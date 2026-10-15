@@ -1,5 +1,6 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
+import fs from 'fs/promises'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
@@ -13,7 +14,8 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      contextIsolation: true
     }
   })
 
@@ -35,6 +37,28 @@ function createWindow(): void {
   }
 }
 
+function IPCEvents(): void {
+  ipcMain.handle('dialog:openFile', async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [
+        { name: 'Books & Documents', extensions: ['epub', 'pdf'] },
+        { name: 'EPUB Books', extensions: ['epub'] },
+        { name: 'PDF Documents', extensions: ['pdf'] }
+      ]
+    })
+
+    if (result.canceled || result.filePaths.length === 0) return null
+    return result.filePaths[0]
+  })
+
+  // 2. Read binary file data into an ArrayBuffer
+  ipcMain.handle('file:readBinary', async (_, filePath: string) => {
+    const buffer = await fs.readFile(filePath)
+    return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+  })
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -53,6 +77,8 @@ app.whenReady().then(() => {
   ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
+
+  IPCEvents()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

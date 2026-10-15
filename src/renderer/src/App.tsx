@@ -1,35 +1,32 @@
-import Versions from './components/Versions'
-import electronLogo from './assets/electron.svg'
+import { useState } from 'react'
 
-function App(): React.JSX.Element {
-  const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
+export default function App(): React.JSX.Element {
+  const [filePath, setFilePath] = useState<string | null>(null)
+
+  const handleOpenFile = async (): Promise<void> => {
+    const selectedPath = await window.api.openFileDialog()
+
+    if (selectedPath) {
+      setFilePath(selectedPath)
+      console.log('User picked file:', selectedPath)
+    }
+  }
 
   return (
-    <>
-      <img alt="logo" className="logo" src={electronLogo} />
-      <div className="creator">Powered by electron-vite</div>
-      <div className="text">
-        Build an Electron app with <span className="react">React</span>
-        &nbsp;and <span className="ts">TypeScript</span>
-      </div>
-      <p className="tip">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
-      <div className="actions">
-        <div className="action">
-          <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
-            Documentation
-          </a>
-        </div>
-        <div className="action">
-          <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
-            Send IPC
-          </a>
-        </div>
-      </div>
-      <Versions></Versions>
-    </>
+    <div style={{ padding: 40, fontFamily: 'sans-serif', color: '#fff' }}>
+      <h1>Modern Reader</h1>
+      <button
+        onClick={handleOpenFile}
+        style={{ padding: '10px 18px', cursor: 'pointer', borderRadius: 6 }}
+      >
+        Choose Book (EPUB / PDF)
+      </button>
+
+      {filePath && (
+        <p style={{ marginTop: 20 }}>
+          Selected: <code>{filePath}</code>
+        </p>
+      )}
+    </div>
   )
 }
-
-export default App
