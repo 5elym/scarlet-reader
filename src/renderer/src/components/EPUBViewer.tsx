@@ -6,9 +6,10 @@ import BubbleMenu from './BubbleMenu'
 
 interface EPUBViewerProps {
   buffer: ArrayBuffer
+  onExit: () => void
 }
 
-export default function EPUBViewer({ buffer }: EPUBViewerProps): React.JSX.Element {
+export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.JSX.Element {
   const viewerRef = useRef<HTMLDivElement>(null)
   const renditionRef = useRef<Rendition | null>(null)
   const selectionRef = useRef<string | null>(null)
@@ -182,7 +183,7 @@ export default function EPUBViewer({ buffer }: EPUBViewerProps): React.JSX.Eleme
         )}
 
         {/* Top Navigation Overlay */}
-        <BubbleMenu isOpen={showUI} onClose={() => setShowUI(false)} />
+        <BubbleMenu isOpen={showUI} onClose={() => setShowUI(false)} onHomeClick={onExit} />
       </div>
     </>
   )

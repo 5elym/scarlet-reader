@@ -41,7 +41,13 @@ export default function App(): React.JSX.Element {
           </div>
         ) : (
           <div className="h-full w-full bg-black">
-            <EPUBViewer buffer={fileBuffer} />
+            <EPUBViewer
+              buffer={fileBuffer}
+              onExit={() => {
+                setFileBuffer(undefined)
+                setFilePath(null)
+              }}
+            />
           </div>
         )}
       </div>
