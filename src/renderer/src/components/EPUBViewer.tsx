@@ -14,7 +14,11 @@ export default function EPUBViewer({ buffer }: EPUBViewerProps): React.JSX.Eleme
     console.log('Buffer exists! Showing EPUB.')
 
     const book = ePub(buffer)
-    const rendition = book.renderTo(viewerRef.current, { width: '100%', height: '100%' })
+    const rendition = book.renderTo(viewerRef.current, {
+      width: '100%',
+      height: '100%',
+      spread: 'none'
+    })
     renditionRef.current = rendition
     rendition.display()
 
@@ -39,8 +43,10 @@ export default function EPUBViewer({ buffer }: EPUBViewerProps): React.JSX.Eleme
   return (
     <>
       <div className="flex h-full w-full flex-col bg-[#F4F1EA]">
-        {/* Container that EPUB is injected into */}
-        <div ref={viewerRef} className="flex-1 w-full overflow-hidden" />
+        <div className="mx-auto flex w-full max-w-3xl flex-1 overflow-hidden px-8">
+          {/* Container that EPUB is injected into */}
+          <div ref={viewerRef} className="flex-1 w-full overflow-hidden" />
+        </div>
 
         {/* Bottom Navigation Bar */}
         <div className="flex h-16 w-full shrink-0 items-center justify-between border-t border-slate-300/50 bg-white/80 px-8 shadow-sm backdrop-blur-sm">
