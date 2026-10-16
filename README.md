@@ -1,10 +1,17 @@
-# scarlet-reader
+# README
 
-An Electron application with React and TypeScript
+An Electron application with React and TypeScript, currently in development
 
-## Recommended IDE Setup
+# Goals
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+- [X] Implement select file dialog
+- [X] View EPUB that is selected
+- [X] Show navigation menu when clicking centre of page
+- [X] Show menu when selecting text
+- [X] Highlight selected text when button clicked
+- [ ] Menu that shows list of all EPUBs and PDFs in a selected folder
+- [ ] Annotate text to add note that shows on all future occurrences of the same text
+- [ ] Port to mobile
 
 ## Project Setup
 
