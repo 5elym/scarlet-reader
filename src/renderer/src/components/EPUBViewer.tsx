@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import ePub, { Rendition } from 'epubjs'
 import { addHighlight } from '../utils/annotation'
 import SelectionMenu from './SelectionMenu'
+import BubbleMenu from './BubbleMenu'
 
 interface EPUBViewerProps {
   buffer: ArrayBuffer
@@ -12,7 +13,7 @@ export default function EPUBViewer({ buffer }: EPUBViewerProps): React.JSX.Eleme
   const renditionRef = useRef<Rendition | null>(null)
   const selectionRef = useRef<string | null>(null)
 
-  const [showUI, setShowUI] = useState(true)
+  const [showUI, setShowUI] = useState(false)
   const [currentSelection, setCurrentSelection] = useState<string | null>(null)
 
   const handleApplyHighlight = (color?: string): void => {
@@ -99,33 +100,10 @@ export default function EPUBViewer({ buffer }: EPUBViewerProps): React.JSX.Eleme
         )}
 
         {/* Top Navigation Overlay */}
-        <div
-          className={`absolute top-0 left-0 z-10 w-full transform bg-white/95 px-6 py-4 shadow-sm backdrop-blur transition-transform duration-300 ${
-            showUI ? 'translate-y-0' : '-translate-y-full'
-          }`}
-        >
-          <div className="flex items-center justify-between pt-safe">
-            {' '}
-            {/* pt-safe handles mobile notches later */}
-            <button className="text-slate-600 font-medium">Library</button>
-            <span className="text-sm font-bold text-slate-800 tracking-wide">Modern Reader</span>
-            <button className="text-slate-600 font-medium">Aa</button> {/* Typography Menu */}
-          </div>
-        </div>
-
-        {/* Bottom Progress Overlay */}
-        <div
-          className={`absolute bottom-0 left-0 z-10 w-full transform bg-white/95 px-6 py-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] backdrop-blur transition-transform duration-300 ${
-            showUI ? 'translate-y-0' : 'translate-y-full'
-          }`}
-        >
-          <div className="flex items-center justify-between pb-safe">
-            <span className="text-xs text-slate-500">Chapter 1</span>
-            <span className="text-xs font-semibold text-slate-900">4%</span>
-            <span className="text-xs text-slate-500">12 mins left</span>
-          </div>
-        </div>
+        <BubbleMenu isOpen={showUI} onClose={() => setShowUI(false)} />
       </div>
     </>
   )
 }
+
+// Hello world

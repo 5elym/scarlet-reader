@@ -18,29 +18,29 @@ export default function App(): React.JSX.Element {
 
   return (
     <>
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-slate-900 text-slate-200">
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-black text-zinc-200">
         {!fileBuffer ? (
-          // Empty State: A clean card in the center of the screen
-          <div className="flex flex-col items-center gap-6 rounded-2xl border border-slate-700 bg-slate-800 p-12 shadow-2xl">
-            <h1 className="text-4xl font-bold tracking-tight text-white">Modern Reader</h1>
+          <div className="flex w-full max-w-sm flex-col items-center gap-10 p-8">
+            <div className="flex flex-col items-center gap-2">
+              <h1 className="text-2xl font-light tracking-[0.2em] text-white uppercase">Reader</h1>
+              <div className="h-px w-12 bg-red-600/50" />
+            </div>
 
             <button
               onClick={handleOpenFile}
-              className="rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white shadow-md transition-colors hover:bg-blue-500 focus:ring-4 focus:ring-blue-500/50 focus:outline-none"
+              className="w-full rounded-full border border-zinc-800 bg-black px-8 py-4 text-sm font-medium tracking-widest text-white transition-all active:scale-95 active:border-red-600 active:text-red-500 outline-none"
             >
-              Choose EPUB
+              CHOOSE EPUB
             </button>
 
             {filePath && (
-              <p className="mt-4 max-w-sm truncate text-sm text-slate-400">
-                Selected:{' '}
-                <code className="rounded bg-slate-900 px-2 py-1 text-slate-300">{filePath}</code>
+              <p className="mt-4 max-w-xs text-center text-xs tracking-widest text-zinc-600 truncate">
+                {filePath.split('/').pop() || filePath.split('\\').pop()}{' '}
               </p>
             )}
           </div>
         ) : (
-          // Reading State: Viewer takes up the entire window
-          <div className="h-full w-full bg-white">
+          <div className="h-full w-full bg-black">
             <EPUBViewer buffer={fileBuffer} />
           </div>
         )}
