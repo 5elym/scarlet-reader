@@ -7,19 +7,21 @@ interface BubbleMenuProps {
   side?: 'left' | 'right'
   onClose: () => void
   onHomeClick: () => void
+  onContentsClick: () => void
 }
 
 export default function BubbleMenu({
   isOpen,
   side = 'right',
   onClose,
-  onHomeClick
+  onHomeClick,
+  onContentsClick
 }: BubbleMenuProps): React.JSX.Element {
   // Placeholder menu items - wire these up to your actual logic later
   const menuItems = [
     { label: 'Library', icon: <House />, action: onHomeClick },
     { label: 'Book Information', icon: <BookText /> },
-    { label: 'Contents', icon: <List /> },
+    { label: 'Contents', icon: <List />, action: onContentsClick },
     { label: 'Settings', icon: <Settings /> }
   ]
   return (

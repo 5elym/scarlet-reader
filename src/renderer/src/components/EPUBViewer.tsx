@@ -3,6 +3,7 @@ import ePub, { Rendition } from 'epubjs'
 import { addHighlight } from '../utils/annotation'
 import SelectionMenu from './SelectionMenu'
 import BubbleMenu from './BubbleMenu'
+import ContentsMenu from './Contents/ContentsMenu'
 
 interface EPUBViewerProps {
   buffer: ArrayBuffer
@@ -14,7 +15,10 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
   const renditionRef = useRef<Rendition | null>(null)
   const selectionRef = useRef<string | null>(null)
 
-  const [showUI, setShowUI] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const [showContents, setShowContents] = useState(false)
+  const [chapters, setChapters] = useState<{ label: string; href: string }[]>([])
+  const [currentLocation, setCurrentLocation] = useState<string | null>(null)
   const [currentSelection, setCurrentSelection] = useState<string | null>(null)
 
   const handleApplyHighlight = (color?: string): void => {
@@ -33,6 +37,14 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
     selectionRef.current = null
   }
 
+  const handleSelectChapter = (href: string): void => {
+    if (renditionRef.current) {
+      renditionRef.current.display(href)
+      setShowContents(false)
+      setShowMenu(false)
+    }
+  }
+
   useEffect(() => {
     if (!viewerRef.current) return
     console.log('Buffer exists! Showing EPUB.')
@@ -47,15 +59,15 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
     })
 
     rendition.themes.default({
-      'html, body': {
-        overflow: 'hidden !important'
-      },
       // Base body styling for readability on black
       body: {
-        color: '#e4e4e7', // Tailwind zinc-200
+        color: '#e4e4e7 !important', // Tailwind zinc-200
         background: 'transparent',
         'font-family':
           'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important'
+      },
+      'p, div, li, blockquote': {
+        color: '#e4e4e7 !important'
       },
       // Paragraph spacing and line height for comfortable reading
       p: {
@@ -128,6 +140,24 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
     renditionRef.current = rendition
     rendition.display()
 
+    book.loaded.navigation.then((nav) => {
+      // Recursive search for chapters
+      const extractChapters = (tocArray): { label: string; href: string }[] => {
+        return tocArray.map((item) => ({
+          label: item.label,
+          href: item.href,
+          subitems:
+            item.subitems && item.subitems.length > 0 ? extractChapters(item.subitems) : undefined
+        }))
+      }
+
+      setChapters(extractChapters(nav.toc))
+    })
+
+    rendition.on('relocated', (location) => {
+      setCurrentLocation(location.start.href)
+    })
+
     rendition.on('click', (e: MouseEvent) => {
       // Check for selected text
       const iframeWindow = e.view as Window
@@ -149,7 +179,7 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
       const clickX = e.clientX % screenWidth
 
       if (clickX > screenWidth * 0.35 && clickX < screenWidth * 0.65) {
-        setShowUI((prev) => !prev)
+        setShowMenu((prev) => !prev)
       } else if (clickX >= screenWidth * 0.65) {
         rendition.next()
       } else {
@@ -183,7 +213,19 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
         )}
 
         {/* Top Navigation Overlay */}
-        <BubbleMenu isOpen={showUI} onClose={() => setShowUI(false)} onHomeClick={onExit} />
+        <BubbleMenu
+          isOpen={showMenu}
+          onClose={() => setShowMenu(false)}
+          onHomeClick={onExit}
+          onContentsClick={() => setShowContents(true)}
+        />
+        <ContentsMenu
+          isOpen={showContents}
+          onClose={() => setShowContents(false)}
+          chapters={chapters}
+          currentHref={currentLocation}
+          onSelectChapter={handleSelectChapter}
+        />
       </div>
     </>
   )
