@@ -40,10 +40,15 @@ export default function EPUBViewer({ buffer }: EPUBViewerProps): React.JSX.Eleme
     const rendition = book.renderTo(viewerRef.current, {
       width: '100%',
       height: '100%',
-      spread: 'none'
+      spread: 'none',
+      flow: 'paginated',
+      manager: 'default'
     })
 
     rendition.themes.default({
+      'html, body': {
+        overflow: 'hidden !important'
+      },
       // Base body styling for readability on black
       body: {
         color: '#e4e4e7', // Tailwind zinc-200
@@ -70,13 +75,24 @@ export default function EPUBViewer({ buffer }: EPUBViewerProps): React.JSX.Eleme
       a: {
         color: '#ef4444 !important',
         'text-decoration': 'none !important'
+      },
+      'img, svg': {
+        'max-width': '100% !important',
+        'max-height': '80vh !important', // Prevents tall images from causing vertical scrolling
+        width: 'auto !important', // Overrides hardcoded publisher widths
+        height: 'auto !important', // Overrides hardcoded publisher heights
+        'object-fit': 'contain !important', // Ensures the image keeps its aspect ratio
+        display: 'block !important',
+        margin: '0 auto !important',
+        'page-break-inside': 'avoid !important',
+        'break-inside': 'avoid !important'
       }
     })
 
     rendition.hooks.content.register((contents) => {
       const doc = contents.document
 
-      // Scan all paragraphs. If one looks exactly like "Chapter X" or "Prologue", color it.
+      // Colour chapter numbers
       const blocks = doc.querySelectorAll('p, div')
       blocks.forEach((el: HTMLElement) => {
         const text = el.textContent?.trim() || ''
@@ -154,9 +170,9 @@ export default function EPUBViewer({ buffer }: EPUBViewerProps): React.JSX.Eleme
 
   return (
     <>
-      <div className="relative h-full w-full">
+      <div className="relative h-full w-full overflow-hidden">
         {/* The Book Container (Takes up 100% of screen) */}
-        <div ref={viewerRef} className="absolute inset-0 z-0" />
+        <div ref={viewerRef} className="absolute inset-0 z-0 overflow-hidden" />
 
         {currentSelection && (
           <SelectionMenu
