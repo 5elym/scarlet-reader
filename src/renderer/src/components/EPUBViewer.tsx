@@ -75,6 +75,10 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
         'font-size': '1.1rem !important',
         'margin-bottom': '1em !important'
       },
+      'em, i': {
+        color: '#a1a1aa !important', // Tailwind zinc-400
+        'font-style': 'italic !important'
+      },
       // Colour chapter titles
       'h1, h2, h3, h4, h5, h6': {
         color: '#dc2626 !important', // Tailwind red-600
@@ -133,6 +137,38 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
         if (text.length > 2 && text === text.toUpperCase() && !/\d/.test(text)) {
           span.style.color = '#dc2626'
           span.style.letterSpacing = '0.05em'
+        }
+      })
+
+      const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false)
+      const textNodes: Node[] = []
+      let node
+
+      // Gather all text nodes that contain straight (") or smart (“ ”) quotes
+      while ((node = walker.nextNode())) {
+        if (node.nodeValue && /["“]/.test(node.nodeValue)) {
+          if (node.parentElement && !['SCRIPT', 'STYLE'].includes(node.parentElement.tagName)) {
+            textNodes.push(node)
+          }
+        }
+      }
+
+      // Loop through the text and recolour the dialogue
+      textNodes.forEach((textNode) => {
+        const text = textNode.nodeValue || ''
+
+        // This Regex matches either straight " or smart “” quotes, and everything inside them
+        const quoteRegex = /(["“][^"”]+["”])/g
+
+        if (quoteRegex.test(text)) {
+          const wrapper = doc.createElement('span')
+
+          wrapper.innerHTML = text.replace(
+            quoteRegex,
+            '<span style="color: #dc2626 !important; font-weight: 400;">$1</span>'
+          )
+
+          textNode.parentNode?.replaceChild(wrapper, textNode)
         }
       })
     })
