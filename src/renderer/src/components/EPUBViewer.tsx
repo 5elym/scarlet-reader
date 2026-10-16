@@ -42,6 +42,72 @@ export default function EPUBViewer({ buffer }: EPUBViewerProps): React.JSX.Eleme
       height: '100%',
       spread: 'none'
     })
+
+    rendition.themes.default({
+      // Base body styling for readability on black
+      body: {
+        color: '#e4e4e7', // Tailwind zinc-200
+        background: 'transparent',
+        'font-family':
+          'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important'
+      },
+      // Paragraph spacing and line height for comfortable reading
+      p: {
+        'line-height': '1.8 !important',
+        'font-size': '1.1rem !important',
+        'margin-bottom': '1em !important'
+      },
+      // Colour chapter titles
+      'h1, h2, h3, h4, h5, h6': {
+        color: '#dc2626 !important', // Tailwind red-600
+        'text-align': 'center !important',
+        'font-weight': '300 !important',
+        'letter-spacing': '0.1em !important',
+        'margin-top': '2em !important',
+        'margin-bottom': '2em !important'
+      },
+      // Fix links just in case
+      a: {
+        color: '#ef4444 !important',
+        'text-decoration': 'none !important'
+      }
+    })
+
+    rendition.hooks.content.register((contents) => {
+      const doc = contents.document
+
+      // Scan all paragraphs. If one looks exactly like "Chapter X" or "Prologue", color it.
+      const blocks = doc.querySelectorAll('p, div')
+      blocks.forEach((el: HTMLElement) => {
+        const text = el.textContent?.trim() || ''
+
+        // Regex looks for standalone chapter markers
+        if (
+          /^(Chapter\s+[a-z0-9]+|Prologue|Epilogue|Part\s+[a-z0-9]+)$/i.test(text) &&
+          text.length < 30
+        ) {
+          el.style.color = '#dc2626'
+          el.style.textAlign = 'center'
+          el.style.fontWeight = '300'
+          el.style.letterSpacing = '0.1em'
+          el.style.marginTop = '2em'
+          el.style.marginBottom = '2em'
+        }
+      })
+
+      // Colour lead ins
+      const spans = doc.querySelectorAll('span')
+      spans.forEach((span: HTMLElement) => {
+        const text = span.textContent?.trim() || ''
+
+        // If the span contains text, is purely uppercase, and is a few letters long
+        if (text.length > 2 && text === text.toUpperCase() && !/\d/.test(text)) {
+          span.style.color = '#dc2626'
+          span.style.letterSpacing = '0.05em'
+        }
+      })
+    })
+
     renditionRef.current = rendition
     rendition.display()
 
@@ -63,7 +129,7 @@ export default function EPUBViewer({ buffer }: EPUBViewerProps): React.JSX.Eleme
       }
 
       const screenWidth = window.innerWidth
-      const clickX = e.clientX
+      const clickX = e.clientX % screenWidth
 
       if (clickX > screenWidth * 0.35 && clickX < screenWidth * 0.65) {
         setShowUI((prev) => !prev)
@@ -88,7 +154,7 @@ export default function EPUBViewer({ buffer }: EPUBViewerProps): React.JSX.Eleme
 
   return (
     <>
-      <div className="relative h-full w-full bg-[#F4F1EA]">
+      <div className="relative h-full w-full">
         {/* The Book Container (Takes up 100% of screen) */}
         <div ref={viewerRef} className="absolute inset-0 z-0" />
 
