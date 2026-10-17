@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import ePub, { Rendition } from 'epubjs'
 import { addHighlight, applyGlobalNotes } from '../utils/annotation'
 import SelectionMenu from './SelectionMenu'
-import BubbleMenu from './BubbleMenu'
+import BubbleMenu from './NavMenu/BubbleMenu'
 import ContentsMenu from './Contents/ContentsMenu'
 import NoteEditor from './Notes/NoteEditor'
 import NoteViewer from './Notes/NoteViewer'
@@ -160,13 +161,16 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
         {/* Book container (Takes up 100% of screen) */}
         <div ref={viewerRef} className="absolute inset-0 z-0 overflow-hidden" />
 
-        {currentSelection && (
-          <SelectionMenu
-            onHighlight={() => handleApplyHighlight('#fde047')}
-            onAddNote={() => setIsTypingNote(true)}
-            onCancel={handleCancelSelection}
-          />
-        )}
+        <AnimatePresence>
+          {currentSelection && (
+            <SelectionMenu
+              onHighlight={() => handleApplyHighlight('#fde047')}
+              onAddNote={() => setIsTypingNote(true)}
+              onCancel={handleCancelSelection}
+            />
+          )}
+        </AnimatePresence>
+
         {currentSelection && isTypingNote && (
           <NoteEditor onSave={handleCreateNote} onCancel={() => setIsTypingNote(false)} />
         )}
