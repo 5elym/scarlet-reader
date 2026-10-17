@@ -175,7 +175,15 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
           <NoteEditor onSave={handleCreateNote} onCancel={() => setIsTypingNote(false)} />
         )}
         {/* Note popup */}
-        {activeNote && <NoteViewer onClose={() => setActiveNote(null)} note={activeNote} />}
+        <AnimatePresence>
+          {activeNote && (
+            <NoteViewer
+              key={activeNote.term}
+              onClose={() => setActiveNote(null)}
+              note={activeNote}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Nav menu */}
         <BubbleMenu
