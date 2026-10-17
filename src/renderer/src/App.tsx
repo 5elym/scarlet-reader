@@ -1,9 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import EPUBViewer from './components/EPUBViewer'
+import { initialiseAppStorage } from './utils/storage'
 
 export default function App(): React.JSX.Element {
   const [filePath, setFilePath] = useState<string | null>(null)
   const [fileBuffer, setFileBuffer] = useState<ArrayBuffer>()
+
+  useEffect(() => {
+    initialiseAppStorage() // Documents/ScarletReader/Books
+  }, [])
 
   const handleOpenFile = async (): Promise<void> => {
     const selectedPath = await window.api.openFileDialog()

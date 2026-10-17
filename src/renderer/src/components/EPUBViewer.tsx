@@ -8,6 +8,7 @@ import NoteEditor from './Notes/NoteEditor'
 import NoteViewer from './Notes/NoteViewer'
 import { clickEvent, register, relocatedEvent, selectedEvent, setTheme } from '../utils/rendition'
 import { Chapter } from '../utils/chapter'
+import { loadGlobalNotes, saveGlobalNotes } from '../utils/storage'
 
 interface EPUBViewerProps {
   buffer: ArrayBuffer
@@ -19,6 +20,7 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
   const renditionRef = useRef<Rendition | null>(null)
   const selectionRef = useRef<string | null>(null)
   const globalNotesRef = useRef<Record<string, string>>({})
+  const dbKeyRef = useRef<string | null>(null)
   const [activeNote, setActiveNote] = useState<{ term: string; note: string } | null>(null)
 
   const [showMenu, setShowMenu] = useState(false)
@@ -52,16 +54,25 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
     }
   }
 
-  const handleCreateNote = (userNote: string): void => {
+  const handleCreateNote = async (userNote: string): Promise<void> => {
     if (!renditionRef.current) return
 
     const contents = renditionRef.current.getContents()[0]
-
     const iframeWindow = contents.window
     const selectedText = iframeWindow.getSelection()?.toString().trim().toLowerCase()
 
-    if (selectedText) {
+    if (selectedText && dbKeyRef.current) {
       globalNotesRef.current[selectedText] = userNote
+
+      try {
+        const allSavedNotes = await loadGlobalNotes()
+        allSavedNotes[dbKeyRef.current] = globalNotesRef.current
+
+        await saveGlobalNotes(allSavedNotes)
+      } catch (err) {
+        console.error('Failed to save note to disk:', err)
+      }
+
       applyGlobalNotes(contents.document, globalNotesRef.current)
     }
 
@@ -97,6 +108,31 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
 
     renditionRef.current = rendition // TODO: May need to swap this around later
     rendition.display()
+
+    book.loaded.metadata.then(async (meta) => {
+      // Create key
+      const author = meta.creator || 'Unknown Author'
+      const baseTitle = (meta.title || 'Unknown Book').split(/[:(]/)[0].trim()
+      const currentBookKey = `notes_${author}_${baseTitle}`
+      dbKeyRef.current = currentBookKey
+
+      try {
+        const allSavedNotes = await loadGlobalNotes()
+
+        if (allSavedNotes[currentBookKey]) {
+          globalNotesRef.current = allSavedNotes[currentBookKey]
+
+          if (renditionRef.current) {
+            const contents = renditionRef.current.getContents()[0]
+            if (contents) applyGlobalNotes(contents.document, globalNotesRef.current)
+          }
+        } else {
+          globalNotesRef.current = {}
+        }
+      } catch (err) {
+        console.error('Failed to load notes from disk:', err)
+      }
+    })
 
     book.loaded.navigation.then((nav) => {
       // Recursive search for chapters
