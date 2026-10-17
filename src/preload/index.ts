@@ -5,7 +5,9 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {
   openFileDialog: (): Promise<string | null> => ipcRenderer.invoke('dialog:openFile'),
   readBinaryFile: (filePath: string): Promise<ArrayBuffer> =>
-    ipcRenderer.invoke('file:readBinary', filePath)
+    ipcRenderer.invoke('file:readBinary', filePath),
+  loadNotes: () => ipcRenderer.invoke('load-notes'),
+  saveNotes: (notesData) => ipcRenderer.invoke('save-notes', notesData)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

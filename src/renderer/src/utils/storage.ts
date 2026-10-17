@@ -1,4 +1,5 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
+import { Capacitor } from '@capacitor/core'
 
 const APP_DIR = 'ScarletReader'
 const BOOKS_DIR = `${APP_DIR}/Books`
@@ -22,6 +23,11 @@ export const initialiseAppStorage = async (): Promise<void> => {
 }
 
 export const loadGlobalNotes = async (): Promise<Record<string, Record<string, string>>> => {
+  if (!Capacitor.isNativePlatform()) {
+    // @ts-ignore: Electron API is provided by preload.
+    return await window.api.loadNotes()
+  }
+
   try {
     const result = await Filesystem.readFile({
       path: NOTES_FILE,
@@ -38,6 +44,11 @@ export const loadGlobalNotes = async (): Promise<Record<string, Record<string, s
 export const saveGlobalNotes = async (
   notesData: Record<string, Record<string, string>>
 ): Promise<boolean> => {
+  if (!Capacitor.isNativePlatform()) {
+    // @ts-ignore: Electron API is provided by preload.
+    return await window.api.saveNotes(notesData)
+  }
+
   try {
     await Filesystem.writeFile({
       path: NOTES_FILE,

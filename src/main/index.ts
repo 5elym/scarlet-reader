@@ -1,6 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
-import fs from 'fs/promises'
+import fs from 'fs'
+import path from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
@@ -52,10 +53,44 @@ function IPCEvents(): void {
     return result.filePaths[0]
   })
 
-  // 2. Read binary file data into an ArrayBuffer
+  // Read binary file data into an ArrayBuffer
   ipcMain.handle('file:readBinary', async (_, filePath: string) => {
-    const buffer = await fs.readFile(filePath)
+    const buffer = await fs.promises.readFile(filePath)
     return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+  })
+
+  // Creating directory and saving/loading notes
+  const documentsPath = app.getPath('documents')
+  const appFolder = path.join(documentsPath, 'ScarletReader')
+  const booksFolder = path.join(appFolder, 'Books')
+  const notesFilePath = path.join(appFolder, 'notes.json')
+
+  // Create the folders when Electron boots
+  if (!fs.existsSync(booksFolder)) {
+    fs.mkdirSync(booksFolder, { recursive: true })
+  }
+
+  ipcMain.handle('load-notes', async () => {
+    try {
+      if (fs.existsSync(notesFilePath)) {
+        const data = fs.readFileSync(notesFilePath, 'utf-8')
+        return JSON.parse(data)
+      }
+      return {}
+    } catch (error) {
+      console.log(error)
+      return {}
+    }
+  })
+
+  ipcMain.handle('save-notes', async (_, notesData) => {
+    try {
+      fs.writeFileSync(notesFilePath, JSON.stringify(notesData, null, 2))
+      return true
+    } catch (error) {
+      console.log(error)
+      return false
+    }
   })
 }
 

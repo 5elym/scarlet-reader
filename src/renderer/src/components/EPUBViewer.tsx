@@ -113,7 +113,7 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
       // Create key
       const author = meta.creator || 'Unknown Author'
       const baseTitle = (meta.title || 'Unknown Book').split(/[:(]/)[0].trim()
-      const currentBookKey = `notes_${author}_${baseTitle}`
+      const currentBookKey = `notes_${author.split(' ').join('_')}_${baseTitle}`
       dbKeyRef.current = currentBookKey
 
       try {
