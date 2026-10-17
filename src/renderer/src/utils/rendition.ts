@@ -8,10 +8,19 @@ export function setTheme(rendition: Rendition): void {
       color: '#e4e4e7 !important', // Tailwind zinc-200
       background: 'transparent',
       'font-family':
-        'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important'
+        'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
     },
-    'p, div, li, blockquote': {
+    'p, div, li': {
       color: '#e4e4e7 !important'
+    },
+    'blockquote, [class*="extract"], [class*="epigraph"], [class*="quote"]': {
+      'font-style': 'italic !important',
+      color: '#a1a1aa !important',
+      'margin-left': '8% !important',
+      'margin-right': '8% !important',
+      'margin-bottom': '2em !important',
+      'padding-left': '1em !important',
+      'border-left': '2px solid #dc2626 !important' // A red accent line on the left
     },
     // Paragraph spacing and line height for comfortable reading
     p: {
