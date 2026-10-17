@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import ePub, { Rendition } from 'epubjs'
-import { addHighlight } from '../utils/annotation'
+import { addHighlight, applyGlobalNotes } from '../utils/annotation'
 import SelectionMenu from './SelectionMenu'
 import BubbleMenu from './BubbleMenu'
 import ContentsMenu from './Contents/ContentsMenu'
+import NoteEditor from './Notes/NoteEditor'
+import NoteViewer from './Notes/NoteViewer'
 
 interface EPUBViewerProps {
   buffer: ArrayBuffer
@@ -14,12 +16,15 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
   const viewerRef = useRef<HTMLDivElement>(null)
   const renditionRef = useRef<Rendition | null>(null)
   const selectionRef = useRef<string | null>(null)
+  const globalNotesRef = useRef<Record<string, string>>({})
+  const [activeNote, setActiveNote] = useState<{ term: string; note: string } | null>(null)
 
   const [showMenu, setShowMenu] = useState(false)
   const [showContents, setShowContents] = useState(false)
   const [chapters, setChapters] = useState<{ label: string; href: string }[]>([])
   const [currentLocation, setCurrentLocation] = useState<string | null>(null)
   const [currentSelection, setCurrentSelection] = useState<string | null>(null)
+  const [isTypingNote, setIsTypingNote] = useState(false)
 
   const handleApplyHighlight = (color?: string): void => {
     if (!renditionRef.current || !currentSelection) return
@@ -43,6 +48,23 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
       setShowContents(false)
       setShowMenu(false)
     }
+  }
+
+  const handleCreateNote = (userNote: string): void => {
+    if (!renditionRef.current) return
+
+    const contents = renditionRef.current.getContents()[0]
+
+    const iframeWindow = contents.window
+    const selectedText = iframeWindow.getSelection()?.toString().trim().toLowerCase()
+
+    if (selectedText) {
+      globalNotesRef.current[selectedText] = userNote
+      applyGlobalNotes(contents.document, globalNotesRef.current)
+    }
+
+    setIsTypingNote(false)
+    handleCancelSelection()
   }
 
   useEffect(() => {
@@ -171,6 +193,8 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
           textNode.parentNode?.replaceChild(wrapper, textNode)
         }
       })
+
+      applyGlobalNotes(doc, globalNotesRef.current)
     })
 
     renditionRef.current = rendition
@@ -195,6 +219,18 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
     })
 
     rendition.on('click', (e: MouseEvent) => {
+      // Global Notes
+      const target = e.target as HTMLElement
+      const noteSpan = target.closest('.global-note')
+      if (noteSpan) {
+        const term = noteSpan.getAttribute('data-term')?.toLowerCase()
+        if (term && globalNotesRef.current[term]) {
+          // Show the note UI and STOP the page from turning
+          setActiveNote({ term, note: globalNotesRef.current[term] })
+          return
+        }
+      }
+
       // Check for selected text
       const iframeWindow = e.view as Window
       const nativeSelection = iframeWindow?.getSelection()?.toString()
@@ -238,17 +274,23 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
   return (
     <>
       <div className="relative h-full w-full overflow-hidden">
-        {/* The Book Container (Takes up 100% of screen) */}
+        {/* Book container (Takes up 100% of screen) */}
         <div ref={viewerRef} className="absolute inset-0 z-0 overflow-hidden" />
 
         {currentSelection && (
           <SelectionMenu
             onHighlight={() => handleApplyHighlight('#fde047')}
+            onAddNote={() => setIsTypingNote(true)}
             onCancel={handleCancelSelection}
           />
         )}
+        {currentSelection && isTypingNote && (
+          <NoteEditor onSave={handleCreateNote} onCancel={() => setIsTypingNote(false)} />
+        )}
+        {/* Note popup */}
+        {activeNote && <NoteViewer onClose={() => setActiveNote(null)} note={activeNote} />}
 
-        {/* Top Navigation Overlay */}
+        {/* Nav menu */}
         <BubbleMenu
           isOpen={showMenu}
           onClose={() => setShowMenu(false)}
