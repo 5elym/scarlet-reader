@@ -4,7 +4,7 @@ import { FilePicker } from '@capawesome/capacitor-file-picker'
 
 const APP_DIR = 'ScarletReader'
 const BOOKS_DIR = `${APP_DIR}/Books`
-const NOTES_FILE = `${APP_DIR}/notes.json`
+const NOTES_FILE = `notes.json`
 
 export const initialiseAppStorage = async (): Promise<void> => {
   try {
@@ -61,7 +61,7 @@ export const loadGlobalNotes = async (): Promise<Record<string, Record<string, s
   try {
     const result = await Filesystem.readFile({
       path: NOTES_FILE,
-      directory: Directory.Documents,
+      directory: Directory.Data,
       encoding: Encoding.UTF8
     })
     return JSON.parse(result.data as string)
@@ -83,7 +83,7 @@ export const saveGlobalNotes = async (
     await Filesystem.writeFile({
       path: NOTES_FILE,
       data: JSON.stringify(notesData, null, 2),
-      directory: Directory.Documents,
+      directory: Directory.Data,
       encoding: Encoding.UTF8
     })
     return true

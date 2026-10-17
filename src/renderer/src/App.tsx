@@ -21,6 +21,7 @@ export default function App(): React.JSX.Element {
         setFileBuffer(buffer)
         console.log('User picked file:', selectedPath)
       }
+      return
     }
 
     const buffer = await openFilePicker()

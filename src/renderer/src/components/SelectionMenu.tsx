@@ -30,11 +30,11 @@ export default function SelectionMenu({
           transition: { duration: 0.2, ease: 'easeIn' }
         }
       }}
-      className="absolute bottom-24 left-1/2 z-20 flex -translate-x-1/2 transform items-center gap-1 rounded-full border border-zinc-800 bg-black/80 p-1.5 shadow-2xl backdrop-blur-md"
+      className="absolute bottom-24 left-1/2 z-20 flex -translate-x-1/2 transform items-center gap-2 rounded-full border border-zinc-800 bg-black/80 p-2 shadow-2xl backdrop-blur-md"
     >
       <button
         onClick={onHighlight}
-        className="rounded-full px-4 py-1.5 text-xs font-semibold text-red-500 transition-colors hover:bg-zinc-900 hover:text-red-400"
+        className="h-14 rounded-full px-5 text-base font-semibold text-red-500 transition-colors hover:bg-zinc-900 hover:text-red-400"
       >
         Highlight
       </button>
@@ -42,7 +42,7 @@ export default function SelectionMenu({
       {onCopy && (
         <button
           onClick={onCopy}
-          className="rounded-full px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-zinc-100"
+          className="h-14 rounded-full px-5 text-base font-semibold text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-zinc-100"
         >
           Copy
         </button>
@@ -51,7 +51,7 @@ export default function SelectionMenu({
       {onAddNote && (
         <button
           onClick={onAddNote}
-          className="rounded-full px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-zinc-100"
+          className="h-14 rounded-full px-5 text-base font-semibold text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-zinc-100"
         >
           Note
         </button>
@@ -59,7 +59,7 @@ export default function SelectionMenu({
 
       <button
         onClick={onCancel}
-        className="rounded-full px-3 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-900 hover:text-zinc-200"
+        className="h-14 rounded-full px-5 text-base font-semibold text-zinc-500 transition-colors hover:bg-zinc-900 hover:text-zinc-200"
       >
         Dismiss
       </button>

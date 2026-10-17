@@ -59,8 +59,8 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
     if (!renditionRef.current) return
 
     const contents = renditionRef.current.getContents()[0]
-    const iframeWindow = contents.window
-    const selectedText = iframeWindow.getSelection()?.toString().trim().toLowerCase()
+    const range = currentSelection ? renditionRef.current.getRange(currentSelection) : null
+    const selectedText = range?.toString().trim().toLowerCase()
 
     if (selectedText && dbKeyRef.current) {
       globalNotesRef.current[selectedText] = userNote
