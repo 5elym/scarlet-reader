@@ -44,7 +44,7 @@ export function applyGlobalNotes(doc: Document, notes: Record<string, string>): 
 
   while ((n = walker.nextNode())) {
     // Avoid double-wrapping text inside already styled elements
-    if (n.parentElement && !['SCRIPT', 'STYLE', 'SPAN'].includes(n.parentElement.tagName)) {
+    if (n.parentElement && !['SCRIPT', 'STYLE'].includes(n.parentElement.tagName)) {
       if (n.nodeValue?.match(regex)) nodes.push(n)
     }
   }
@@ -54,7 +54,7 @@ export function applyGlobalNotes(doc: Document, notes: Record<string, string>): 
     const wrapper = doc.createElement('span')
     wrapper.innerHTML = text.replace(
       regex,
-      `<span class="global-note" data-term="$1" style="color: #dc2626; border-bottom: 1px dashed #dc2626; cursor: pointer;">$1</span>`
+      `<span class="global-note" data-term="$1" style="border-bottom: 1px dashed #dc2626; cursor: pointer;">$1</span>`
     )
     node.parentNode?.replaceChild(wrapper, node)
   })
