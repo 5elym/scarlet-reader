@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import EPUBViewer from './components/EPUBViewer'
-import { initialiseAppStorage } from './utils/storage'
+import { initialiseAppStorage, openFilePicker } from './utils/storage'
+import { Capacitor } from '@capacitor/core'
 
 export default function App(): React.JSX.Element {
   const [filePath, setFilePath] = useState<string | null>(null)
@@ -11,13 +12,20 @@ export default function App(): React.JSX.Element {
   }, [])
 
   const handleOpenFile = async (): Promise<void> => {
-    const selectedPath = await window.api.openFileDialog()
+    if (!Capacitor.isNativePlatform()) {
+      const selectedPath = await window.api.openFileDialog()
 
-    if (selectedPath) {
-      const buffer = await window.api.readBinaryFile(selectedPath)
-      setFilePath(selectedPath)
+      if (selectedPath) {
+        const buffer = await window.api.readBinaryFile(selectedPath)
+        setFilePath(selectedPath)
+        setFileBuffer(buffer)
+        console.log('User picked file:', selectedPath)
+      }
+    }
+
+    const buffer = await openFilePicker()
+    if (buffer) {
       setFileBuffer(buffer)
-      console.log('User picked file:', selectedPath)
     }
   }
 
