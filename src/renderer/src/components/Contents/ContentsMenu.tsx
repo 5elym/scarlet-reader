@@ -1,6 +1,7 @@
 import React from 'react'
 import ChapterItem from './ChapterItem'
 import { Chapter } from '../../utils/chapter'
+import { useHardwareBack } from '../../utils/returnBack'
 
 interface ContentsPageProps {
   isOpen: boolean
@@ -17,6 +18,8 @@ export default function ContentsPage({
   currentHref,
   onSelectChapter
 }: ContentsPageProps): React.JSX.Element {
+  useHardwareBack(isOpen, onClose)
+
   return (
     <div
       className={`absolute inset-0 z-60 flex flex-col bg-black text-white transition-transform duration-500 ease-in-out ${
