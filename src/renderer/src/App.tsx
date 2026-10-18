@@ -7,13 +7,27 @@ import { pageStack } from './utils/returnBack'
 import Header from './components/Library/Header'
 import BookList from './components/Library/BookList'
 import SettingsButton from './components/Library/SettingsButton'
+import { loadBooks, StoredBook } from './utils/storage'
 
 export default function App(): React.JSX.Element {
   const [filePath, setFilePath] = useState<string | null>(null)
   const [fileBuffer, setFileBuffer] = useState<ArrayBuffer>()
+  const [books, setBooks] = useState<StoredBook[] | null>(null)
+  const [booksError, setBooksError] = useState<string | null>(null)
 
   useEffect(() => {
-    initialiseAppStorage() // Documents/ScarletReader/Books
+    const loadLibrary = async (): Promise<void> => {
+      try {
+        await initialiseAppStorage()
+        setBooks(await loadBooks())
+      } catch (error) {
+        console.error('Failed to load books:', error)
+        setBooksError('Your books could not be loaded.')
+        setBooks([])
+      }
+    }
+
+    void loadLibrary()
   }, [])
 
   // Hijack back button or gesture on mobile device
@@ -56,9 +70,15 @@ export default function App(): React.JSX.Element {
       <div className="relative flex h-screen w-screen flex-col overflow-hidden bg-black text-zinc-200">
         {!fileBuffer ? (
           <div className="mx-auto flex h-full w-full max-w-2xl flex-col px-6 pb-28 pt-10 sm:px-10">
-            <Header />
+            <Header bookCount={books?.length ?? 0} />
 
-            <BookList filePath={filePath} openFile={handleOpenFile} />
+            <BookList
+              books={books}
+              error={booksError}
+              filePath={filePath}
+              openFile={handleOpenFile}
+              onSelectBook={(book) => setFileBuffer(book.buffer)}
+            />
 
             <SettingsButton />
           </div>

@@ -6,6 +6,11 @@ const APP_DIR = 'ScarletReader'
 const BOOKS_DIR = `${APP_DIR}/Books`
 const NOTES_FILE = `notes.json`
 
+export interface StoredBook {
+  name: string
+  buffer: ArrayBuffer
+}
+
 export const initialiseAppStorage = async (): Promise<void> => {
   try {
     await Filesystem.requestPermissions()
@@ -23,6 +28,39 @@ export const initialiseAppStorage = async (): Promise<void> => {
   }
 }
 
+export const loadBooks = async (): Promise<StoredBook[]> => {
+  if (!Capacitor.isNativePlatform()) {
+    return await window.api.loadBooks()
+  }
+
+  // Get files in Books dir
+  const result = await Filesystem.readdir({
+    path: BOOKS_DIR,
+    directory: Directory.Documents
+  })
+
+  // Get data from each epub file in Books dir
+  const books: StoredBook[] = []
+  for (const file of result.files) {
+    if (!file.name.toLowerCase().endsWith('.epub')) continue
+
+    const content = await Filesystem.readFile({
+      path: `${BOOKS_DIR}/${file.name}`,
+      directory: Directory.Documents
+    })
+
+    const binaryString = window.atob(content.data.toString())
+    const bytes = new Uint8Array(binaryString.length)
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i)
+    }
+
+    books.push({ name: file.name, buffer: bytes.buffer })
+  }
+
+  return books
+}
+
 export const openFilePicker = async (): Promise<ArrayBuffer | null> => {
   try {
     const result = await FilePicker.pickFiles({
@@ -32,7 +70,6 @@ export const openFilePicker = async (): Promise<ArrayBuffer | null> => {
 
     const file = result.files[0]
 
-    // Ensure user picked an EPUB
     if (file && file.name.endsWith('.epub') && file.data) {
       // The native picker gives us Base64 data, convert to ArrayBuffer for epub.js
       const binaryString = window.atob(file.data)

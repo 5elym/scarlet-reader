@@ -70,6 +70,26 @@ function IPCEvents(): void {
     fs.mkdirSync(booksFolder, { recursive: true })
   }
 
+  ipcMain.handle('load-books', async () => {
+    const files = await fs.promises.readdir(booksFolder, { withFileTypes: true })
+    const books: Array<{ name: string; buffer: ArrayBuffer }> = []
+
+    for (const file of files) {
+      if (!file.isFile() || !file.name.toLowerCase().endsWith('.epub')) continue
+
+      const contents = await fs.promises.readFile(path.join(booksFolder, file.name))
+      books.push({
+        name: file.name,
+        buffer: contents.buffer.slice(
+          contents.byteOffset,
+          contents.byteOffset + contents.byteLength
+        )
+      })
+    }
+
+    return books
+  })
+
   ipcMain.handle('load-notes', async () => {
     try {
       if (fs.existsSync(notesFilePath)) {
