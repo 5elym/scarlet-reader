@@ -4,10 +4,15 @@ import { useHardwareBack } from '../../utils/returnBack'
 
 interface NoteViewerProps {
   onClose: () => void
+  onDelete: (note) => void
   note: Record<string, string>
 }
 
-export default function NoteViewer({ onClose, note }: NoteViewerProps): React.JSX.Element {
+export default function NoteViewer({
+  onClose,
+  note,
+  onDelete
+}: NoteViewerProps): React.JSX.Element {
   useHardwareBack(!!note, onClose)
 
   return (
@@ -30,10 +35,16 @@ export default function NoteViewer({ onClose, note }: NoteViewerProps): React.JS
         <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-red-500">{note.term}</h3>
         <p className="text-base leading-relaxed text-zinc-200">{note.note}</p>
 
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex justify-between">
+          <button
+            onClick={() => onDelete(note)}
+            className="text-[10px] font-semibold tracking-widest text-zinc-400 transition-colors active:text-zinc-300"
+          >
+            DELETE
+          </button>
           <button
             onClick={onClose}
-            className="text-[10px] font-semibold tracking-widest text-zinc-500 transition-colors active:text-zinc-300"
+            className="text-[10px] font-semibold tracking-widest text-zinc-400 transition-colors active:text-zinc-300"
           >
             CLOSE
           </button>

@@ -32,6 +32,11 @@ export function addHighlight(
 }
 
 export function applyGlobalNotes(doc: Document, notes: Record<string, string>): void {
+  // Refresh note styling
+  doc.querySelectorAll('.global-note').forEach((noteSpan) => {
+    noteSpan.replaceWith(doc.createTextNode(noteSpan.textContent || ''))
+  })
+
   const terms = Object.keys(notes)
   if (terms.length === 0) return
 

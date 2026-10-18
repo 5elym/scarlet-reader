@@ -89,8 +89,8 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
         allSavedNotes[dbKeyRef.current] = globalNotesRef.current
 
         await saveGlobalNotes(allSavedNotes)
-      } catch (err) {
-        console.error('Failed to save note to disk:', err)
+      } catch (error) {
+        console.error('Failed to save note to disk:', error)
       }
 
       applyGlobalNotes(contents.document, globalNotesRef.current)
@@ -98,6 +98,27 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
 
     setIsTypingNote(false)
     handleCancelSelection()
+  }
+
+  const handleDeleteNote = async (note: Record<string, string>): Promise<void> => {
+    if (!renditionRef.current) return
+
+    const contents = renditionRef.current.getContents()[0]
+
+    try {
+      const allSavedNotes = await loadGlobalNotes()
+      if (!dbKeyRef.current) return
+
+      delete allSavedNotes[dbKeyRef.current][note.term]
+      globalNotesRef.current = allSavedNotes[dbKeyRef.current]
+
+      await saveGlobalNotes(allSavedNotes)
+
+      setActiveNote(null)
+      applyGlobalNotes(contents.document, globalNotesRef.current)
+    } catch (error) {
+      console.error('Failed to delete note: ' + error)
+    }
   }
 
   useEffect(() => {
@@ -209,6 +230,7 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
             <NoteViewer
               key={activeNote.term}
               onClose={() => setActiveNote(null)}
+              onDelete={handleDeleteNote}
               note={activeNote}
             />
           )}
