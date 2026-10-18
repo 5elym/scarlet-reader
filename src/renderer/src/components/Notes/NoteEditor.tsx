@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { onBackGesture } from '../../utils/returnBack'
+import { useHardwareBack } from '../../utils/returnBack'
 
 interface NoteEditorProps {
   onSave: (note: string) => void
@@ -14,7 +14,7 @@ export default function NoteEditor({
 }: NoteEditorProps): React.JSX.Element {
   const [text, setText] = useState('')
 
-  onBackGesture(isOpen, onCancel)
+  useHardwareBack(isOpen, onCancel)
 
   return (
     <div className="absolute inset-0 z-70 flex flex-col bg-black/90 p-6 backdrop-blur-sm">

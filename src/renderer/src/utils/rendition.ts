@@ -60,7 +60,7 @@ export function setTheme(rendition: Rendition): void {
   })
 }
 
-export function register(rendition: Rendition, notesRef): void {
+export function colourText(rendition: Rendition, notesRef): void {
   rendition.hooks.content.register((contents) => {
     const doc = contents.document
 
@@ -143,11 +143,20 @@ export function clickEvent(
   selectionRef,
   setActiveNote,
   setCurrentSelection,
-  setShowMenu
+  setShowMenu,
+  zoomedImageRef
 ): void {
   rendition.on('click', (e: MouseEvent) => {
+    if (zoomedImageRef.current) return
+
     // Global Notes
     const target = e.target as HTMLElement
+
+    if (target.closest('#zoom-container')) {
+      setShowMenu(false)
+      return
+    }
+
     const noteSpan = target.closest('.global-note')
     if (noteSpan) {
       const term = noteSpan.getAttribute('data-term')?.toLowerCase()
@@ -192,5 +201,40 @@ export function selectedEvent(rendition: Rendition, selectionRef, setCurrentSele
     console.log('User highlighted this location:', cfiRange)
     setCurrentSelection(cfiRange)
     selectionRef.current = cfiRange
+  })
+}
+
+export function configureImageZoom(rendition: Rendition, setZoomedImage): void {
+  rendition.hooks.content.register((contents) => {
+    const iframeDoc = contents.document
+    const images = iframeDoc.querySelectorAll('img')
+
+    images.forEach((img: HTMLImageElement) => {
+      let pressTimer: NodeJS.Timeout
+
+      /// Handle long press
+      img.addEventListener('touchstart', () => {
+        pressTimer = setTimeout(() => {
+          setZoomedImage(img.src)
+        }, 500)
+      })
+
+      img.addEventListener('mousedown', () => {
+        pressTimer = setTimeout(() => {
+          setZoomedImage(img.src)
+        }, 500)
+      })
+
+      // Cancel timer on letting go or scrolling
+      img.addEventListener('touchend', () => clearTimeout(pressTimer))
+      img.addEventListener('touchmove', () => clearTimeout(pressTimer))
+      img.addEventListener('mouseup', () => clearTimeout(pressTimer))
+
+      // Disable native image context menu
+      img.addEventListener('contextmenu', (e) => {
+        e.preventDefault()
+        setZoomedImage(img.src)
+      })
+    })
   })
 }

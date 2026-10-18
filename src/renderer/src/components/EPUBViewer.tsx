@@ -7,10 +7,18 @@ import BubbleMenu from './NavMenu/BubbleMenu'
 import ContentsMenu from './Contents/ContentsMenu'
 import NoteEditor from './Notes/NoteEditor'
 import NoteViewer from './Notes/NoteViewer'
-import { clickEvent, register, relocatedEvent, selectedEvent, setTheme } from '../utils/rendition'
+import {
+  clickEvent,
+  configureImageZoom,
+  colourText,
+  relocatedEvent,
+  selectedEvent,
+  setTheme
+} from '../utils/rendition'
 import { Chapter } from '../utils/chapter'
 import { loadGlobalNotes, saveGlobalNotes } from '../utils/storage'
-import { onBackGesture } from '../utils/returnBack'
+import { useHardwareBack } from '../utils/returnBack'
+import ImageViewer from './ImageViewer'
 
 interface EPUBViewerProps {
   buffer: ArrayBuffer
@@ -23,16 +31,24 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
   const selectionRef = useRef<string | null>(null)
   const globalNotesRef = useRef<Record<string, string>>({})
   const dbKeyRef = useRef<string | null>(null)
-  const [activeNote, setActiveNote] = useState<{ term: string; note: string } | null>(null)
+  const zoomedImageRef = useRef(false)
 
+  const [activeNote, setActiveNote] = useState<{ term: string; note: string } | null>(null)
   const [showMenu, setShowMenu] = useState(false)
   const [showContents, setShowContents] = useState(false)
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [currentLocation, setCurrentLocation] = useState<string | null>(null)
   const [currentSelection, setCurrentSelection] = useState<string | null>(null)
   const [isTypingNote, setIsTypingNote] = useState(false)
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null)
 
-  onBackGesture(true, () => {})
+  useHardwareBack(true, () => {})
+
+  const handleSetZoomedImage = (image: string | null): void => {
+    zoomedImageRef.current = !!image
+    if (image) setShowMenu(false)
+    setZoomedImage(image)
+  }
 
   const handleApplyHighlight = (color?: string): void => {
     if (!renditionRef.current || !currentSelection) return
@@ -98,7 +114,8 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
     })
 
     setTheme(rendition)
-    register(rendition, globalNotesRef)
+    colourText(rendition, globalNotesRef)
+    configureImageZoom(rendition, handleSetZoomedImage)
     relocatedEvent(rendition, setCurrentLocation)
     clickEvent(
       rendition,
@@ -106,7 +123,8 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
       selectionRef,
       setActiveNote,
       setCurrentSelection,
-      setShowMenu
+      setShowMenu,
+      zoomedImageRef
     )
     selectedEvent(rendition, selectionRef, setCurrentSelection)
 
@@ -164,6 +182,10 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
         {/* Book container (Takes up 100% of screen) */}
         <div ref={viewerRef} className="absolute inset-0 z-0 overflow-hidden" />
 
+        {zoomedImage && (
+          <ImageViewer image={zoomedImage} closeImage={() => handleSetZoomedImage(null)} />
+        )}
+
         <AnimatePresence>
           {currentSelection && (
             <SelectionMenu
@@ -193,12 +215,14 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
         </AnimatePresence>
 
         {/* Nav menu */}
-        <BubbleMenu
-          isOpen={showMenu}
-          onClose={() => setShowMenu(false)}
-          onHomeClick={onExit}
-          onContentsClick={() => setShowContents(true)}
-        />
+        {!zoomedImage && (
+          <BubbleMenu
+            isOpen={showMenu}
+            onClose={() => setShowMenu(false)}
+            onHomeClick={onExit}
+            onContentsClick={() => setShowContents(true)}
+          />
+        )}
         <ContentsMenu
           isOpen={showContents}
           onClose={() => setShowContents(false)}
