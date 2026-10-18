@@ -10,6 +10,7 @@ import NoteViewer from './Notes/NoteViewer'
 import { clickEvent, register, relocatedEvent, selectedEvent, setTheme } from '../utils/rendition'
 import { Chapter } from '../utils/chapter'
 import { loadGlobalNotes, saveGlobalNotes } from '../utils/storage'
+import { onBackGesture } from '../utils/returnBack'
 
 interface EPUBViewerProps {
   buffer: ArrayBuffer
@@ -30,6 +31,8 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
   const [currentLocation, setCurrentLocation] = useState<string | null>(null)
   const [currentSelection, setCurrentSelection] = useState<string | null>(null)
   const [isTypingNote, setIsTypingNote] = useState(false)
+
+  onBackGesture(true, () => {})
 
   const handleApplyHighlight = (color?: string): void => {
     if (!renditionRef.current || !currentSelection) return
@@ -172,7 +175,11 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
         </AnimatePresence>
 
         {currentSelection && isTypingNote && (
-          <NoteEditor onSave={handleCreateNote} onCancel={() => setIsTypingNote(false)} />
+          <NoteEditor
+            onSave={handleCreateNote}
+            isOpen={isTypingNote}
+            onCancel={() => setIsTypingNote(false)}
+          />
         )}
         {/* Note popup */}
         <AnimatePresence>

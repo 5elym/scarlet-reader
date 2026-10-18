@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { BookText, House, List, Settings } from 'lucide-react'
 import MenuBackground from './MenuBackground'
 import MenuItem from './MenuItem'
+import { onBackGesture } from '../../utils/returnBack'
 
 interface BubbleMenuProps {
   isOpen: boolean
@@ -27,6 +28,8 @@ export default function BubbleMenu({
     { label: 'Contents', icon: <List />, action: onContentsClick },
     { label: 'Settings', icon: <Settings /> }
   ]
+
+  onBackGesture(isOpen, onClose)
 
   return (
     <>

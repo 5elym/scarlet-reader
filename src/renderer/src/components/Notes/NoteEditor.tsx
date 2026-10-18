@@ -1,15 +1,23 @@
 import React, { useState } from 'react'
+import { onBackGesture } from '../../utils/returnBack'
 
 interface NoteEditorProps {
   onSave: (note: string) => void
   onCancel: () => void
+  isOpen: boolean
 }
 
-export default function NoteEditor({ onSave, onCancel }: NoteEditorProps): React.JSX.Element {
+export default function NoteEditor({
+  onSave,
+  onCancel,
+  isOpen
+}: NoteEditorProps): React.JSX.Element {
   const [text, setText] = useState('')
 
+  onBackGesture(isOpen, onCancel)
+
   return (
-    <div className="absolute inset-0 z-[70] flex flex-col bg-black/90 p-6 backdrop-blur-sm">
+    <div className="absolute inset-0 z-70 flex flex-col bg-black/90 p-6 backdrop-blur-sm">
       <div className="flex w-full max-w-md flex-col mx-auto mt-24 gap-4">
         <div className="flex justify-between items-end">
           <label className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">

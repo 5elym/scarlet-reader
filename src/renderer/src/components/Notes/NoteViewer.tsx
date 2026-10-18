@@ -1,5 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
+import { onBackGesture } from '../../utils/returnBack'
 
 interface NoteViewerProps {
   onClose: () => void
@@ -7,6 +8,8 @@ interface NoteViewerProps {
 }
 
 export default function NoteViewer({ onClose, note }: NoteViewerProps): React.JSX.Element {
+  onBackGesture(!!note, onClose)
+
   return (
     <motion.div
       initial={{ opacity: 0 }}

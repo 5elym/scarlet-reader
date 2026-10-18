@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import EPUBViewer from './components/EPUBViewer'
 import { initialiseAppStorage, openFilePicker } from './utils/storage'
 import { Capacitor } from '@capacitor/core'
+import { App as CapacitorApp } from '@capacitor/app'
+import { pageStack } from './utils/returnBack'
 
 export default function App(): React.JSX.Element {
   const [filePath, setFilePath] = useState<string | null>(null)
@@ -9,6 +11,22 @@ export default function App(): React.JSX.Element {
 
   useEffect(() => {
     initialiseAppStorage() // Documents/ScarletReader/Books
+  }, [])
+
+  // Hijack back button or gesture on mobile device
+  useEffect(() => {
+    CapacitorApp.addListener('backButton', () => {
+      if (pageStack.length > 0) {
+        const topAction = pageStack[pageStack.length - 1]
+        topAction()
+      } else {
+        CapacitorApp.exitApp()
+      }
+    })
+
+    return () => {
+      CapacitorApp.removeAllListeners()
+    }
   }, [])
 
   const handleOpenFile = async (): Promise<void> => {
