@@ -5,7 +5,7 @@ import { Capacitor } from '@capacitor/core'
 import { App as CapacitorApp } from '@capacitor/app'
 import { pageStack } from './utils/returnBack'
 import Header from './components/Library/Header'
-import BookList from './components/Library/BookList'
+import List from './components/Library/BookList/List'
 import SettingsButton from './components/Library/SettingsButton'
 import { loadBooks, StoredBook } from './utils/storage'
 
@@ -72,7 +72,7 @@ export default function App(): React.JSX.Element {
           <div className="mx-auto flex h-full w-full max-w-2xl flex-col px-6 pb-28 pt-10 sm:px-10">
             <Header bookCount={books?.length ?? 0} />
 
-            <BookList
+            <List
               books={books}
               error={booksError}
               filePath={filePath}
