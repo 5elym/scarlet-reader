@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import ePub, { Rendition } from 'epubjs'
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import { addHighlight, applyGlobalNotes } from '../utils/annotation'
 import SelectionMenu from './SelectionMenu'
 import BubbleMenu from './NavMenu/BubbleMenu'
