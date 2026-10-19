@@ -25,7 +25,7 @@ export function setTheme(rendition: Rendition): void {
     // Paragraph spacing and line height for comfortable reading
     p: {
       'line-height': '1.8 !important',
-      'font-size': '1.1rem !important',
+      // 'font-size': '1.1rem !important',
       'margin-bottom': '1em !important'
     },
     'em, i': {
@@ -49,9 +49,9 @@ export function setTheme(rendition: Rendition): void {
     },
     'img, svg': {
       'max-width': '100% !important',
-      'max-height': '80vh !important', // Prevents tall images from causing vertical scrolling
-      width: 'auto !important', // Overrides hardcoded publisher widths
-      height: 'auto !important', // Overrides hardcoded publisher heights
+      // 'max-height': '80vh !important', // Prevents tall images from causing vertical scrolling
+      // width: 'auto !important', // Overrides hardcoded publisher widths
+      // height: 'auto !important', // Overrides hardcoded publisher heights
       'object-fit': 'contain !important', // Ensures the image keeps its aspect ratio
       display: 'block !important',
       margin: '0 auto !important',
@@ -132,9 +132,10 @@ export function colourText(rendition: Rendition, notesRef): void {
   })
 }
 
-export function relocatedEvent(rendition: Rendition, setCurrentLocation): void {
+export function relocatedEvent(rendition: Rendition, setCurrentLocation, currentLocationRef): void {
   rendition.on('relocated', (location) => {
     setCurrentLocation(location.start.href)
+    currentLocationRef.current = location.start.cfi
   })
 }
 

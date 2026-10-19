@@ -19,6 +19,7 @@ import { Chapter } from '../utils/chapter'
 import { loadGlobalNotes, saveGlobalNotes } from '../utils/storage'
 import { useHardwareBack } from '../utils/returnBack'
 import ImageViewer from './ImageViewer'
+import { useSettingsStore } from '../utils/globalSettings'
 
 interface EPUBViewerProps {
   buffer: ArrayBuffer
@@ -37,6 +38,7 @@ export default function EPUBViewer({
   const globalNotesRef = useRef<Record<string, string>>({})
   const dbKeyRef = useRef<string | null>(null)
   const zoomedImageRef = useRef(false)
+  const currentLocationRef = useRef<string | null>(null)
 
   const [activeNote, setActiveNote] = useState<{ term: string; note: string } | null>(null)
   const [showMenu, setShowMenu] = useState(false)
@@ -46,6 +48,10 @@ export default function EPUBViewer({
   const [currentSelection, setCurrentSelection] = useState<string | null>(null)
   const [isTypingNote, setIsTypingNote] = useState(false)
   const [zoomedImage, setZoomedImage] = useState<string | null>(null)
+
+  // Pull settings from Zustand
+  const fontSize = useSettingsStore((state) => state.fontSize)
+  const isPaginated = useSettingsStore((state) => state.isPaginated)
 
   useHardwareBack(true, () => {})
 
@@ -135,14 +141,14 @@ export default function EPUBViewer({
       width: '100%',
       height: '100%',
       spread: 'none',
-      flow: 'paginated',
-      manager: 'default'
+      flow: isPaginated ? 'paginated' : 'scrolled',
+      manager: isPaginated ? 'default' : 'continuous'
     })
 
     setTheme(rendition)
     colourText(rendition, globalNotesRef)
     configureImageZoom(rendition, handleSetZoomedImage)
-    relocatedEvent(rendition, setCurrentLocation)
+    relocatedEvent(rendition, setCurrentLocation, currentLocationRef)
     clickEvent(
       rendition,
       globalNotesRef,
@@ -155,7 +161,7 @@ export default function EPUBViewer({
     selectedEvent(rendition, selectionRef, setCurrentSelection)
 
     renditionRef.current = rendition // TODO: May need to swap this around later
-    rendition.display()
+    rendition.display(currentLocationRef.current || undefined)
 
     book.loaded.metadata.then(async (meta) => {
       // Create key
@@ -200,7 +206,13 @@ export default function EPUBViewer({
       console.log('Cleaning up book...')
       book.destroy()
     }
-  }, [buffer])
+  }, [buffer, isPaginated])
+
+  useEffect(() => {
+    if (renditionRef.current) {
+      renditionRef.current.themes.fontSize(`${fontSize}%`)
+    }
+  }, [fontSize])
 
   return (
     <>

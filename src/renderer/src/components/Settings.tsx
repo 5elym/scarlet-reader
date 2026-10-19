@@ -1,5 +1,6 @@
 import React from 'react'
 import { useHardwareBack } from '../utils/returnBack'
+import { useSettingsStore } from '../utils/globalSettings'
 
 interface SettingsProps {
   isOpen: boolean
@@ -8,6 +9,7 @@ interface SettingsProps {
 
 export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.Element {
   useHardwareBack(isOpen, onClose)
+  const { fontSize, setFontSize, setIsPaginated } = useSettingsStore()
 
   return (
     <div className="flex h-full flex-col bg-black p-6 text-zinc-200">
@@ -35,6 +37,7 @@ export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.
           </div>
           <div className="flex items-center gap-4">
             <button
+              onClick={() => setFontSize(fontSize - 10)}
               type="button"
               aria-label="Decrease font size"
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-lg text-zinc-300 transition-colors active:border-red-600/70 active:text-red-400"
@@ -43,6 +46,7 @@ export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.
             </button>
             <span className="min-w-8 text-center text-sm text-zinc-400">A</span>
             <button
+              onClick={() => setFontSize(fontSize + 10)}
               type="button"
               aria-label="Increase font size"
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-lg text-zinc-300 transition-colors active:border-red-600/70 active:text-red-400"
@@ -57,6 +61,7 @@ export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.
           <p className="mt-1 text-xs text-zinc-500">Choose how to move through the book</p>
           <div className="mt-3 flex flex-col gap-2">
             <button
+              onClick={() => setIsPaginated(false)}
               type="button"
               className="flex items-center justify-between rounded-lg border border-red-600/60 bg-red-950/20 px-4 py-3 text-left text-sm text-zinc-200"
             >
@@ -64,6 +69,7 @@ export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.
               <span className="h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
             </button>
             <button
+              onClick={() => setIsPaginated(true)}
               type="button"
               className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-left text-sm text-zinc-400 transition-colors active:border-zinc-700 active:text-zinc-200"
             >
