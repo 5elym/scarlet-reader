@@ -8,12 +8,14 @@ import Header from './components/Library/Header'
 import List from './components/Library/BookList/List'
 import SettingsButton from './components/Library/SettingsButton'
 import { loadBooks, StoredBook } from './utils/storage'
+import Settings from './components/Settings'
 
 export default function App(): React.JSX.Element {
   const [filePath, setFilePath] = useState<string | null>(null)
   const [fileBuffer, setFileBuffer] = useState<ArrayBuffer>()
   const [books, setBooks] = useState<StoredBook[] | null>(null)
   const [booksError, setBooksError] = useState<string | null>(null)
+  const [settingsMenuOpen, setSettingsMenuOpen] = useState<boolean>(false)
 
   useEffect(() => {
     const loadLibrary = async (): Promise<void> => {
@@ -65,9 +67,14 @@ export default function App(): React.JSX.Element {
     }
   }
 
+  const handleCloseSettings = (): void => {
+    setSettingsMenuOpen(false)
+  }
+
   return (
     <>
       <div className="relative flex h-screen w-screen flex-col overflow-hidden bg-black text-zinc-200">
+        {settingsMenuOpen && <Settings isOpen={settingsMenuOpen} onClose={handleCloseSettings} />}
         {!fileBuffer ? (
           <div className="mx-auto flex h-full w-full max-w-2xl flex-col px-6 pb-28 pt-10 sm:px-10">
             <Header bookCount={books?.length ?? 0} />
@@ -80,7 +87,7 @@ export default function App(): React.JSX.Element {
               onSelectBook={(book) => setFileBuffer(book.buffer)}
             />
 
-            <SettingsButton />
+            <SettingsButton open={() => setSettingsMenuOpen(true)} />
           </div>
         ) : (
           <div className="h-full w-full bg-black">
@@ -90,6 +97,7 @@ export default function App(): React.JSX.Element {
                 setFileBuffer(undefined)
                 setFilePath(null)
               }}
+              onOpenSettings={() => setSettingsMenuOpen(true)}
             />
           </div>
         )}

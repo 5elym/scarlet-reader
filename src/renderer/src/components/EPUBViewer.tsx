@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import ePub, { Rendition } from 'epubjs'
-import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import { addHighlight, applyGlobalNotes } from '../utils/annotation'
 import SelectionMenu from './SelectionMenu'
 import BubbleMenu from './NavMenu/BubbleMenu'
@@ -24,9 +23,14 @@ import ImageViewer from './ImageViewer'
 interface EPUBViewerProps {
   buffer: ArrayBuffer
   onExit: () => void
+  onOpenSettings: () => void
 }
 
-export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.JSX.Element {
+export default function EPUBViewer({
+  buffer,
+  onExit,
+  onOpenSettings
+}: EPUBViewerProps): React.JSX.Element {
   const viewerRef = useRef<HTMLDivElement>(null)
   const renditionRef = useRef<Rendition | null>(null)
   const selectionRef = useRef<string | null>(null)
@@ -244,6 +248,7 @@ export default function EPUBViewer({ buffer, onExit }: EPUBViewerProps): React.J
             onClose={() => setShowMenu(false)}
             onHomeClick={onExit}
             onContentsClick={() => setShowContents(true)}
+            onSettingsClick={() => onOpenSettings}
           />
         )}
         <ContentsMenu

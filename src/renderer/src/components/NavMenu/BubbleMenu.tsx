@@ -12,6 +12,7 @@ interface BubbleMenuProps {
   onClose: () => void
   onHomeClick: () => void
   onContentsClick: () => void
+  onSettingsClick: () => void
 }
 
 export default function BubbleMenu({
@@ -19,14 +20,15 @@ export default function BubbleMenu({
   side = 'right',
   onClose,
   onHomeClick,
-  onContentsClick
+  onContentsClick,
+  onSettingsClick
 }: BubbleMenuProps): React.JSX.Element {
   // Placeholder menu items - wire these up to your actual logic later
   const menuItems = [
     { label: 'Library', icon: <House />, action: onHomeClick },
     { label: 'Book Information', icon: <BookText /> },
     { label: 'Contents', icon: <List />, action: onContentsClick },
-    { label: 'Settings', icon: <Settings /> }
+    { label: 'Settings', icon: <Settings />, action: onSettingsClick }
   ]
 
   useHardwareBack(isOpen, onClose)
