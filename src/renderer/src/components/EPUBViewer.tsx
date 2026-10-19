@@ -218,7 +218,7 @@ export default function EPUBViewer({
     <>
       <div className="relative h-full w-full overflow-hidden">
         {/* Book container (Takes up 100% of screen) */}
-        <div ref={viewerRef} className="absolute inset-0 z-0 overflow-hidden" />
+        <div ref={viewerRef} className="absolute inset-0 z-0 overflow-hidden scrollbar-hide" />
 
         {zoomedImage && (
           <ImageViewer image={zoomedImage} closeImage={() => handleSetZoomedImage(null)} />

@@ -1,2 +1,10 @@
 @import 'tailwindcss';
 @import 'tailwind-scrollbar-hide/v4';
+
+.epub-container {
+  scrollbar-width: none; /* Firefox */
+}
+
+.epub-container::-webkit-scrollbar {
+  display: none; /* Chrome, Edge, Safari */
+}

@@ -9,7 +9,7 @@ interface SettingsProps {
 
 export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.Element {
   useHardwareBack(isOpen, onClose)
-  const { fontSize, setFontSize, setIsPaginated } = useSettingsStore()
+  const { fontSize, setFontSize, isPaginated, setIsPaginated } = useSettingsStore()
 
   return (
     <div className="flex h-full flex-col bg-black p-6 text-zinc-200">
@@ -40,11 +40,12 @@ export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.
               onClick={() => setFontSize(fontSize - 10)}
               type="button"
               aria-label="Decrease font size"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-lg text-zinc-300 transition-colors active:border-red-600/70 active:text-red-400"
+              disabled={fontSize === 0}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-lg text-zinc-300 transition-colors active:border-red-600/70 active:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               −
             </button>
-            <span className="min-w-8 text-center text-sm text-zinc-400">A</span>
+            <span className="min-w-12 text-center text-sm text-zinc-400">{fontSize}%</span>
             <button
               onClick={() => setFontSize(fontSize + 10)}
               type="button"
@@ -63,18 +64,38 @@ export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.
             <button
               onClick={() => setIsPaginated(false)}
               type="button"
-              className="flex items-center justify-between rounded-lg border border-red-600/60 bg-red-950/20 px-4 py-3 text-left text-sm text-zinc-200"
+              aria-pressed={!isPaginated}
+              className={`flex items-center justify-between rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
+                !isPaginated
+                  ? 'border-red-600/60 bg-red-950/20 text-zinc-200'
+                  : 'border-zinc-800 bg-zinc-900/50 text-zinc-400 active:border-zinc-700 active:text-zinc-200'
+              }`}
             >
               <span>Scroll with tap</span>
-              <span className="h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  !isPaginated ? 'bg-red-500' : 'border border-zinc-600'
+                }`}
+                aria-hidden="true"
+              />
             </button>
             <button
               onClick={() => setIsPaginated(true)}
               type="button"
-              className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-left text-sm text-zinc-400 transition-colors active:border-zinc-700 active:text-zinc-200"
+              aria-pressed={isPaginated}
+              className={`flex items-center justify-between rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
+                isPaginated
+                  ? 'border-red-600/60 bg-red-950/20 text-zinc-200'
+                  : 'border-zinc-800 bg-zinc-900/50 text-zinc-400 active:border-zinc-700 active:text-zinc-200'
+              }`}
             >
               <span>Tap only</span>
-              <span className="h-2 w-2 rounded-full border border-zinc-600" aria-hidden="true" />
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  isPaginated ? 'bg-red-500' : 'border border-zinc-600'
+                }`}
+                aria-hidden="true"
+              />
             </button>
           </div>
         </section>

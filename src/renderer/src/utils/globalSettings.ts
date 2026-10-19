@@ -10,7 +10,7 @@ interface SettingsState {
 
 export const useSettingsStore = create<SettingsState>((set) => ({
   fontSize: 100, // Percentage
-  setFontSize: (size) => set({ fontSize: size }),
+  setFontSize: (size) => set({ fontSize: Math.max(0, size) }),
   isPaginated: true, // false = Continuous Scroll with taps, true = Paginated taps
   setIsPaginated: (val) => set({ isPaginated: val })
 }))
