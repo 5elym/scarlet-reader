@@ -70,6 +70,53 @@ function IPCEvents(): void {
     fs.mkdirSync(booksFolder, { recursive: true })
   }
 
+  const getAvailableBookPath = async (fileName: string): Promise<string> => {
+    const extension = path.extname(fileName)
+    const baseName = path.basename(fileName, extension)
+    let candidateName = fileName
+    let suffix = 1
+
+    while (true) {
+      const candidatePath = path.join(booksFolder, candidateName)
+      try {
+        await fs.promises.access(candidatePath)
+        candidateName = `${baseName} (${suffix})${extension}`
+        suffix++
+      } catch {
+        return candidatePath
+      }
+    }
+  }
+
+  ipcMain.handle('import-book', async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [{ name: 'EPUB Books', extensions: ['epub'] }]
+    })
+
+    if (result.canceled || result.filePaths.length === 0) return false
+    const sourcePath = result.filePaths[0]
+    if (path.extname(sourcePath).toLowerCase() !== '.epub') {
+      throw new Error('The selected file is not an EPUB.')
+    }
+
+    const destinationPath = await getAvailableBookPath(path.basename(sourcePath))
+    await fs.promises.copyFile(sourcePath, destinationPath)
+    return true
+  })
+
+  ipcMain.handle('delete-book', async (_, name: string) => {
+    if (
+      typeof name !== 'string' ||
+      path.basename(name) !== name ||
+      !name.toLowerCase().endsWith('.epub')
+    ) {
+      throw new Error('Invalid book name.')
+    }
+
+    await fs.promises.unlink(path.join(booksFolder, name))
+  })
+
   ipcMain.handle('load-books', async () => {
     const files = await fs.promises.readdir(booksFolder, { withFileTypes: true })
     const books: Array<{ name: string; buffer: ArrayBuffer }> = []

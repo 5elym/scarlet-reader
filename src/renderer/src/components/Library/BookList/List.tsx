@@ -14,16 +14,16 @@ export interface BookDetails {
 interface ListProps {
   books: StoredBook[] | null
   error: string | null
-  filePath: string | null
-  openFile: () => void
+  onImportBook: () => void
+  onDeleteBook: (name: string) => void
   onSelectBook: (book: StoredBook) => void
 }
 
 export default function List({
   books,
   error,
-  filePath,
-  openFile,
+  onImportBook,
+  onDeleteBook,
   onSelectBook
 }: ListProps): React.JSX.Element {
   const [bookDetails, setBookDetails] = useState<BookDetails[]>([])
@@ -84,25 +84,44 @@ export default function List({
   return (
     <>
       <main className="flex flex-1 flex-col pt-7">
-        <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
-          Recently added
-        </h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">
+            Recently added
+          </h2>
+          {books && books.length > 0 && (
+            <button
+              type="button"
+              onClick={onImportBook}
+              className="text-xs font-semibold uppercase tracking-widest text-red-500 transition-colors active:text-red-400"
+            >
+              Import EPUB
+            </button>
+          )}
+        </div>
 
         {books === null ? (
           <p className="py-8 text-center text-sm text-zinc-500">Loading your library…</p>
         ) : books.length > 0 ? (
-          <ul className="flex flex-col gap-3">
-            {bookDetails.map((details) => (
-              <BookItem
-                key={details.book.name}
-                book={details.book}
-                details={details}
-                onSelect={onSelectBook}
-              />
-            ))}
-          </ul>
+          <>
+            {error && (
+              <p role="alert" className="mb-3 text-sm text-red-400">
+                {error}
+              </p>
+            )}
+            <ul className="flex flex-col gap-3">
+              {bookDetails.map((details) => (
+                <BookItem
+                  key={details.book.name}
+                  book={details.book}
+                  details={details}
+                  onSelect={onSelectBook}
+                  onDelete={onDeleteBook}
+                />
+              ))}
+            </ul>
+          </>
         ) : (
-          <NoBooksView error={error} filePath={filePath} openFile={openFile} />
+          <NoBooksView error={error} onImportBook={onImportBook} />
         )}
       </main>
     </>

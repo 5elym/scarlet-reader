@@ -3,15 +3,10 @@ import React from 'react'
 
 interface NoBooksViewProps {
   error: string | null
-  filePath: string | null
-  openFile: () => void
+  onImportBook: () => void
 }
 
-export default function NoBooksView({
-  error,
-  filePath,
-  openFile
-}: NoBooksViewProps): React.JSX.Element {
+export default function NoBooksView({ error, onImportBook }: NoBooksViewProps): React.JSX.Element {
   return (
     <>
       <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/40 px-6 py-12 text-center">
@@ -22,19 +17,14 @@ export default function NoBooksView({
           {error ? 'Library unavailable' : 'Your library is empty'}
         </h3>
         <p className="mt-2 max-w-xs text-sm leading-relaxed text-zinc-500">
-          {error || 'Choose an EPUB to start building your reading collection.'}
+          {error || 'Import an EPUB to start building your reading collection.'}
         </p>
         <button
-          onClick={openFile}
+          onClick={onImportBook}
           className="mt-7 rounded-full border border-zinc-700 bg-zinc-900 px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-100 transition-colors hover:border-red-600/70 hover:text-red-400 active:scale-95"
         >
-          Choose EPUB
+          Import EPUB
         </button>
-        {filePath && (
-          <p className="mt-4 max-w-xs truncate text-xs tracking-widest text-zinc-600">
-            {filePath.split('/').pop() || filePath.split('\\').pop()}
-          </p>
-        )}
       </div>
     </>
   )

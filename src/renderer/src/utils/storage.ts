@@ -12,19 +12,19 @@ export interface StoredBook {
 }
 
 export const initialiseAppStorage = async (): Promise<void> => {
-  try {
-    await Filesystem.requestPermissions()
+  if (!Capacitor.isNativePlatform()) return
 
-    // Create the main app folder and the Books subfolder.
+  try {
+    await Filesystem.readdir({
+      path: BOOKS_DIR,
+      directory: Directory.Data
+    })
+  } catch {
     await Filesystem.mkdir({
       path: BOOKS_DIR,
-      directory: Directory.Documents,
+      directory: Directory.Data,
       recursive: true
     })
-
-    console.log('Main folders created!.')
-  } catch (error) {
-    console.log('Storage already exists or permission denied.', error)
   }
 }
 
@@ -36,7 +36,7 @@ export const loadBooks = async (): Promise<StoredBook[]> => {
   // Get files in Books dir
   const result = await Filesystem.readdir({
     path: BOOKS_DIR,
-    directory: Directory.Documents
+    directory: Directory.Data
   })
 
   // Get data from each epub file in Books dir
@@ -46,7 +46,7 @@ export const loadBooks = async (): Promise<StoredBook[]> => {
 
     const content = await Filesystem.readFile({
       path: `${BOOKS_DIR}/${file.name}`,
-      directory: Directory.Documents
+      directory: Directory.Data
     })
 
     const binaryString = window.atob(content.data.toString())
@@ -61,32 +61,73 @@ export const loadBooks = async (): Promise<StoredBook[]> => {
   return books
 }
 
-export const openFilePicker = async (): Promise<ArrayBuffer | null> => {
-  try {
-    const result = await FilePicker.pickFiles({
-      limit: 1,
-      readData: true // TODO: not recommended
-    })
+const getAvailableBookName = (fileName: string, existingNames: string[]): string => {
+  const normalizedNames = new Set(existingNames.map((name) => name.toLowerCase()))
+  const extension = fileName.slice(fileName.lastIndexOf('.'))
+  const baseName = fileName.slice(0, -extension.length)
+  let candidate = fileName
+  let suffix = 1
 
-    const file = result.files[0]
-
-    if (file && file.name.endsWith('.epub') && file.data) {
-      // The native picker gives us Base64 data, convert to ArrayBuffer for epub.js
-      const binaryString = window.atob(file.data)
-      const bytes = new Uint8Array(binaryString.length)
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i)
-      }
-
-      return bytes.buffer
-    } else {
-      alert('Please select a valid .epub file')
-    }
-  } catch (error) {
-    console.log('User canceled file picking or it failed:', error)
+  while (normalizedNames.has(candidate.toLowerCase())) {
+    candidate = `${baseName} (${suffix})${extension}`
+    suffix++
   }
 
-  return null
+  return candidate
+}
+
+export const importBook = async (): Promise<boolean> => {
+  if (!Capacitor.isNativePlatform()) {
+    return await window.api.importBook()
+  }
+
+  const result = await FilePicker.pickFiles({ limit: 1 })
+  const file = result.files[0]
+
+  if (!file) return false
+  if (!file.name.toLowerCase().endsWith('.epub')) {
+    throw new Error('The selected file is not an EPUB.')
+  }
+  if (!file.path) {
+    throw new Error('The selected EPUB does not have an accessible file path.')
+  }
+
+  const safeName = file.name.replace(/[\\/]/g, '_')
+  const existingFiles = await Filesystem.readdir({
+    path: BOOKS_DIR,
+    directory: Directory.Data
+  })
+  const name = getAvailableBookName(
+    safeName,
+    existingFiles.files.map((existingFile) => existingFile.name)
+  )
+  const destination = await Filesystem.getUri({
+    path: `${BOOKS_DIR}/${name}`,
+    directory: Directory.Data
+  })
+
+  await FilePicker.copyFile({
+    from: file.path,
+    to: destination.uri
+  })
+
+  return true
+}
+
+export const deleteBook = async (name: string): Promise<void> => {
+  if (name !== name.replace(/[\\/]/g, '') || !name.toLowerCase().endsWith('.epub')) {
+    throw new Error('Invalid book name.')
+  }
+
+  if (!Capacitor.isNativePlatform()) {
+    await window.api.deleteBook(name)
+    return
+  }
+
+  await Filesystem.deleteFile({
+    path: `${BOOKS_DIR}/${name}`,
+    directory: Directory.Data
+  })
 }
 
 export const loadGlobalNotes = async (): Promise<Record<string, Record<string, string>>> => {

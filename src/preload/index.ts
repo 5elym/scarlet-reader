@@ -6,6 +6,8 @@ const api = {
   openFileDialog: (): Promise<string | null> => ipcRenderer.invoke('dialog:openFile'),
   readBinaryFile: (filePath: string): Promise<ArrayBuffer> =>
     ipcRenderer.invoke('file:readBinary', filePath),
+  importBook: (): Promise<boolean> => ipcRenderer.invoke('import-book'),
+  deleteBook: (name: string): Promise<void> => ipcRenderer.invoke('delete-book', name),
   loadBooks: (): Promise<Array<{ name: string; buffer: ArrayBuffer }>> =>
     ipcRenderer.invoke('load-books'),
   loadNotes: () => ipcRenderer.invoke('load-notes'),

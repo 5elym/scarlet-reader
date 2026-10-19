@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import EPUBViewer from './components/EPUBViewer'
-import { initialiseAppStorage, openFilePicker } from './utils/storage'
-import { Capacitor } from '@capacitor/core'
+import { deleteBook, importBook, initialiseAppStorage } from './utils/storage'
 import { App as CapacitorApp } from '@capacitor/app'
 import { pageStack } from './utils/returnBack'
 import Header from './components/Library/Header'
@@ -11,7 +10,6 @@ import { loadBooks, StoredBook } from './utils/storage'
 import Settings from './components/Settings'
 
 export default function App(): React.JSX.Element {
-  const [filePath, setFilePath] = useState<string | null>(null)
   const [fileBuffer, setFileBuffer] = useState<ArrayBuffer>()
   const [books, setBooks] = useState<StoredBook[] | null>(null)
   const [booksError, setBooksError] = useState<string | null>(null)
@@ -48,22 +46,28 @@ export default function App(): React.JSX.Element {
     }
   }, [])
 
-  const handleOpenFile = async (): Promise<void> => {
-    if (!Capacitor.isNativePlatform()) {
-      const selectedPath = await window.api.openFileDialog()
+  const handleImportBook = async (): Promise<void> => {
+    try {
+      const imported = await importBook()
+      if (!imported) return
 
-      if (selectedPath) {
-        const buffer = await window.api.readBinaryFile(selectedPath)
-        setFilePath(selectedPath)
-        setFileBuffer(buffer)
-        console.log('User picked file:', selectedPath)
-      }
-      return
+      setBooks(await loadBooks())
+      setBooksError(null)
+    } catch (error) {
+      console.error('Failed to import book:', error)
+      setBooksError('The selected EPUB could not be imported.')
     }
+  }
 
-    const buffer = await openFilePicker()
-    if (buffer) {
-      setFileBuffer(buffer)
+  const handleDeleteBook = async (name: string): Promise<void> => {
+    try {
+      await deleteBook(name)
+
+      setBooks(await loadBooks())
+      setBooksError(null)
+    } catch (error) {
+      console.error(`Failed to delete "${name}":`, error)
+      setBooksError('The selected book could not be deleted.')
     }
   }
 
@@ -80,7 +84,6 @@ export default function App(): React.JSX.Element {
               buffer={fileBuffer}
               onExit={() => {
                 setFileBuffer(undefined)
-                setFilePath(null)
               }}
               onOpenSettings={() => setSettingsMenuOpen(true)}
             />
@@ -92,8 +95,8 @@ export default function App(): React.JSX.Element {
             <List
               books={books}
               error={booksError}
-              filePath={filePath}
-              openFile={handleOpenFile}
+              onImportBook={handleImportBook}
+              onDeleteBook={handleDeleteBook}
               onSelectBook={(book) => setFileBuffer(book.buffer)}
             />
 
