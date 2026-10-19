@@ -248,7 +248,7 @@ export default function EPUBViewer({
             onClose={() => setShowMenu(false)}
             onHomeClick={onExit}
             onContentsClick={() => setShowContents(true)}
-            onSettingsClick={() => onOpenSettings}
+            onSettingsClick={onOpenSettings}
           />
         )}
         <ContentsMenu

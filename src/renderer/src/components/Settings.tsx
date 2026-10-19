@@ -13,7 +13,7 @@ export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.
     <div className="flex h-full flex-col bg-black p-6 text-zinc-200">
       <header className="flex items-start justify-between border-b border-zinc-800/80 pb-5">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-red-500">
+          <p className="text-[10px] text-center font-semibold uppercase tracking-[0.3em] text-red-500">
             Scarlet Reader
           </p>
           <h1 className="mt-3 text-2xl font-light tracking-wide text-white">Settings</h1>

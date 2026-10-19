@@ -33,14 +33,15 @@ export function setTheme(rendition: Rendition): void {
       'font-style': 'italic !important'
     },
     // Colour chapter titles
-    'h1, h2, h3, h4, h5, h6': {
-      color: '#dc2626 !important', // Tailwind red-600
-      'text-align': 'center !important',
-      'font-weight': '300 !important',
-      'letter-spacing': '0.1em !important',
-      'margin-top': '2em !important',
-      'margin-bottom': '2em !important'
-    },
+    'h1, h2, h3, h4, h5, h6, [class*="title"], [class*="Title"], [class*="subtitle"], [class*="heading"]':
+      {
+        color: '#dc2626 !important', // Tailwind red-600
+        'text-align': 'center !important',
+        'font-weight': '300 !important',
+        'letter-spacing': '0.1em !important',
+        'margin-top': '2em !important',
+        'margin-bottom': '2em !important'
+      },
     // Fix links just in case
     a: {
       color: '#ef4444 !important',
