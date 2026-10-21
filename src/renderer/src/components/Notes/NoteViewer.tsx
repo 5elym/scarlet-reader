@@ -33,7 +33,7 @@ export default function NoteViewer({
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-red-500">{note.term}</h3>
-        <p className="text-base leading-relaxed text-zinc-200">{note.note}</p>
+        <p className="text-base leading-relaxed text-zinc-200 whitespace-pre-wrap">{note.note}</p>
 
         <div className="mt-4 flex justify-between">
           <button
