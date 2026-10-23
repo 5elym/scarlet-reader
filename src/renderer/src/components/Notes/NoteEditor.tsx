@@ -2,17 +2,19 @@ import React, { useState } from 'react'
 import { useHardwareBack } from '../../utils/returnBack'
 
 interface NoteEditorProps {
+  existingNote: string | undefined
   onSave: (note: string) => void
   onCancel: () => void
   isOpen: boolean
 }
 
 export default function NoteEditor({
+  existingNote,
   onSave,
   onCancel,
   isOpen
 }: NoteEditorProps): React.JSX.Element {
-  const [text, setText] = useState('')
+  const [text, setText] = useState(existingNote || '')
 
   useHardwareBack(isOpen, onCancel)
 

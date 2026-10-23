@@ -42,12 +42,13 @@ export default function EPUBViewer({
   const currentLocationRef = useRef<string | null>(null)
 
   const [activeNote, setActiveNote] = useState<{ term: string; note: string } | null>(null)
+  const [editingNote, setEditingNote] = useState<{ term: string; note: string } | null>(null)
+  const [isTypingNote, setIsTypingNote] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [showContents, setShowContents] = useState(false)
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [currentLocation, setCurrentLocation] = useState<string | null>(null)
   const [currentSelection, setCurrentSelection] = useState<string | null>(null)
-  const [isTypingNote, setIsTypingNote] = useState(false)
   const [zoomedImage, setZoomedImage] = useState<string | null>(null)
 
   // Pull settings from Zustand
@@ -91,7 +92,7 @@ export default function EPUBViewer({
 
     const contents = renditionRef.current.getContents()[0]
     const range = currentSelection ? renditionRef.current.getRange(currentSelection) : null
-    const selectedText = range?.toString().trim().toLowerCase()
+    const selectedText = editingNote?.term ?? range?.toString().trim().toLowerCase()
     const savedCurrentLocation = currentLocationRef.current
 
     if (selectedText && dbKeyRef.current) {
@@ -108,6 +109,7 @@ export default function EPUBViewer({
     }
 
     setIsTypingNote(false)
+    setEditingNote(null)
     handleCancelSelection()
     applyGlobalNotes(contents.document, globalNotesRef.current)
 
@@ -133,10 +135,17 @@ export default function EPUBViewer({
       await saveGlobalNotes(allSavedNotes)
 
       setActiveNote(null)
+      setEditingNote(null)
       applyGlobalNotes(contents.document, globalNotesRef.current)
     } catch (error) {
       console.error('Failed to delete note: ' + error)
     }
+  }
+
+  const handleEditNote = async (note: { term: string; note: string }): Promise<void> => {
+    setEditingNote(note)
+    setActiveNote(null)
+    setIsTypingNote(true)
   }
 
   useEffect(() => {
@@ -242,11 +251,15 @@ export default function EPUBViewer({
           )}
         </AnimatePresence>
 
-        {currentSelection && isTypingNote && (
+        {isTypingNote && (
           <NoteEditor
+            existingNote={editingNote?.note ?? activeNote?.note}
             onSave={handleCreateNote}
             isOpen={isTypingNote}
-            onCancel={() => setIsTypingNote(false)}
+            onCancel={() => {
+              setIsTypingNote(false)
+              setEditingNote(null)
+            }}
           />
         )}
         {/* Note popup */}
@@ -254,9 +267,10 @@ export default function EPUBViewer({
           {activeNote && (
             <NoteViewer
               key={activeNote.term}
-              onClose={() => setActiveNote(null)}
-              onDelete={handleDeleteNote}
               note={activeNote}
+              onClose={() => setActiveNote(null)}
+              onEdit={handleEditNote}
+              onDelete={handleDeleteNote}
             />
           )}
         </AnimatePresence>

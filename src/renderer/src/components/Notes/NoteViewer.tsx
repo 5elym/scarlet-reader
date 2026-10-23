@@ -3,14 +3,16 @@ import { motion } from 'framer-motion'
 import { useHardwareBack } from '../../utils/returnBack'
 
 interface NoteViewerProps {
-  onClose: () => void
-  onDelete: (note) => void
   note: Record<string, string>
+  onClose: () => void
+  onEdit: (note) => void
+  onDelete: (note) => void
 }
 
 export default function NoteViewer({
-  onClose,
   note,
+  onClose,
+  onEdit,
   onDelete
 }: NoteViewerProps): React.JSX.Element {
   useHardwareBack(!!note, onClose)
@@ -41,6 +43,12 @@ export default function NoteViewer({
             className="text-[10px] font-semibold tracking-widest text-zinc-400 transition-colors active:text-zinc-300"
           >
             DELETE
+          </button>
+          <button
+            onClick={() => onEdit(note)}
+            className="text-[10px] font-semibold tracking-widest text-zinc-400 transition-colors active:text-zinc-300"
+          >
+            EDIT
           </button>
           <button
             onClick={onClose}
