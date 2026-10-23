@@ -13,7 +13,8 @@ import {
   colourText,
   relocatedEvent,
   selectedEvent,
-  setTheme
+  setTheme,
+  configurePullPreviousPage
 } from '../utils/rendition'
 import { Chapter } from '../utils/chapter'
 import { loadGlobalNotes, saveGlobalNotes } from '../utils/storage'
@@ -147,13 +148,14 @@ export default function EPUBViewer({
       width: '100%',
       height: '100%',
       spread: 'none',
-      flow: isPaginated ? 'paginated' : 'scrolled',
-      manager: isPaginated ? 'default' : 'continuous'
+      flow: isPaginated ? 'paginated' : 'scrolled-doc',
+      manager: 'default'
     })
 
     setTheme(rendition)
     colourText(rendition, globalNotesRef)
     configureImageZoom(rendition, handleSetZoomedImage)
+    configurePullPreviousPage(rendition)
     relocatedEvent(rendition, setCurrentLocation, currentLocationRef)
     clickEvent(
       rendition,

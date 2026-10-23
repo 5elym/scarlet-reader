@@ -240,3 +240,38 @@ export function configureImageZoom(rendition: Rendition, setZoomedImage): void {
     })
   })
 }
+
+export function configurePullPreviousPage(rendition: Rendition): void {
+  rendition.hooks.content.register((contents) => {
+    const iframeWindow = contents.window
+    let touchStartY = 0
+
+    iframeWindow.addEventListener('touchstart', (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY
+    })
+
+    iframeWindow.addEventListener('touchend', (e: TouchEvent) => {
+      const touchEndY = e.changedTouches[0].clientY
+      const pullDistance = touchEndY - touchStartY // drag down = positive distance
+
+      const isAtTop = iframeWindow.scrollY <= 0
+
+      // If at the top AND they pull down by at least 75 pixels
+      if (isAtTop && pullDistance > 75) {
+        rendition.prev().then(() => {
+          // Wait for DOM to render
+          setTimeout(() => {
+            const newIframe = rendition.getContents()[0]?.window
+            if (newIframe) {
+              // Snap to bottom of previous page
+              newIframe.scrollTo({
+                top: newIframe.document.body.scrollHeight,
+                behavior: 'auto'
+              })
+            }
+          }, 50)
+        })
+      }
+    })
+  })
+}
