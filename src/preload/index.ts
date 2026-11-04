@@ -11,7 +11,9 @@ const api = {
   loadBooks: (): Promise<Array<{ name: string; buffer: ArrayBuffer }>> =>
     ipcRenderer.invoke('load-books'),
   loadNotes: () => ipcRenderer.invoke('load-notes'),
-  saveNotes: (notesData) => ipcRenderer.invoke('save-notes', notesData)
+  saveNotes: (notesData) => ipcRenderer.invoke('save-notes', notesData),
+  loadSettings: () => ipcRenderer.invoke('load-settings'),
+  saveSettings: (settingsData) => ipcRenderer.invoke('save-settings', settingsData)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -64,6 +64,7 @@ function IPCEvents(): void {
   const appFolder = path.join(documentsPath, 'ScarletReader')
   const booksFolder = path.join(appFolder, 'Books')
   const notesFilePath = path.join(appFolder, 'notes.json')
+  const settingsFilePath = path.join(appFolder, 'settings.json')
 
   // Create the folders when Electron boots
   if (!fs.existsSync(booksFolder)) {
@@ -156,6 +157,29 @@ function IPCEvents(): void {
       return true
     } catch (error) {
       console.log(error)
+      return false
+    }
+  })
+
+  ipcMain.handle('load-settings', async () => {
+    try {
+      if (fs.existsSync(settingsFilePath)) {
+        const data = fs.readFileSync(settingsFilePath, 'utf-8')
+        return JSON.parse(data)
+      }
+      return {}
+    } catch (error) {
+      console.error('Failed to load settings:', error)
+      return {}
+    }
+  })
+
+  ipcMain.handle('save-settings', async (_, settingsData) => {
+    try {
+      fs.writeFileSync(settingsFilePath, JSON.stringify(settingsData, null, 2))
+      return true
+    } catch (error) {
+      console.error('Failed to save settings:', error)
       return false
     }
   })

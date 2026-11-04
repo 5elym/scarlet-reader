@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import EPUBViewer from './components/EPUBViewer'
-import { deleteBook, importBook, initialiseAppStorage } from './utils/storage'
+import { deleteBook, importBook, initialiseAppStorage, loadSettings } from './utils/storage'
 import { App as CapacitorApp } from '@capacitor/app'
 import { pageStack } from './utils/returnBack'
 import Header from './components/Library/Header'
@@ -8,6 +8,7 @@ import List from './components/Library/BookList/List'
 import SettingsButton from './components/Library/SettingsButton'
 import { loadBooks, StoredBook } from './utils/storage'
 import Settings from './components/Settings'
+import { useSettingsStore } from './utils/globalSettings'
 
 export default function App(): React.JSX.Element {
   const [fileBuffer, setFileBuffer] = useState<ArrayBuffer>()
@@ -19,6 +20,15 @@ export default function App(): React.JSX.Element {
     const loadLibrary = async (): Promise<void> => {
       try {
         await initialiseAppStorage()
+        const settingsData = await loadSettings()
+        const globalSettings = settingsData.global
+        if (
+          globalSettings &&
+          Number.isFinite(globalSettings.fontSize) &&
+          typeof globalSettings.isPaginated === 'boolean'
+        ) {
+          useSettingsStore.getState().loadSettings(globalSettings)
+        }
         setBooks(await loadBooks())
       } catch (error) {
         console.error('Failed to load books:', error)

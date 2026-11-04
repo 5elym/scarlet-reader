@@ -1,10 +1,12 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
 import { Capacitor } from '@capacitor/core'
 import { FilePicker } from '@capawesome/capacitor-file-picker'
+import type { ReaderSettings } from './globalSettings'
 
 const APP_DIR = 'ScarletReader'
 const BOOKS_DIR = `${APP_DIR}/Books`
 const NOTES_FILE = `notes.json`
+const SETTINGS_FILE = `settings.json`
 
 export interface StoredBook {
   name: string
@@ -167,6 +169,45 @@ export const saveGlobalNotes = async (
     return true
   } catch (error) {
     console.error('Failed to save notes:', error)
+    return false
+  }
+}
+
+export const loadSettings = async (): Promise<Record<string, ReaderSettings>> => {
+  if (!Capacitor.isNativePlatform()) {
+    return await window.api.loadSettings()
+  }
+
+  try {
+    const result = await Filesystem.readFile({
+      path: SETTINGS_FILE,
+      directory: Directory.Data,
+      encoding: Encoding.UTF8
+    })
+    return JSON.parse(result.data as string)
+  } catch (error) {
+    console.error('Failed to load settings:', error)
+    return {}
+  }
+}
+
+export const saveSettings = async (
+  settingsData: Record<string, ReaderSettings>
+): Promise<boolean> => {
+  if (!Capacitor.isNativePlatform()) {
+    return await window.api.saveSettings(settingsData)
+  }
+
+  try {
+    await Filesystem.writeFile({
+      path: SETTINGS_FILE,
+      data: JSON.stringify(settingsData, null, 2),
+      directory: Directory.Data,
+      encoding: Encoding.UTF8
+    })
+    return true
+  } catch (error) {
+    console.error('Failed to save settings:', error)
     return false
   }
 }

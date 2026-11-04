@@ -9,5 +9,9 @@ interface Window {
     deleteBook: (name: string) => Promise<void>
     loadNotes: () => Promise<Record<string, Record<string, string>>>
     saveNotes: (notesData: Record<string, Record<string, string>>) => Promise<boolean>
+    loadSettings: () => Promise<Record<string, { fontSize: number; isPaginated: boolean }>>
+    saveSettings: (
+      settingsData: Record<string, { fontSize: number; isPaginated: boolean }>
+    ) => Promise<boolean>
   }
 }

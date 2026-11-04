@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useHardwareBack } from '../utils/returnBack'
 import { useSettingsStore } from '../utils/globalSettings'
+import { loadSettings, saveSettings } from '../utils/storage'
 
 interface SettingsProps {
   isOpen: boolean
@@ -10,6 +11,19 @@ interface SettingsProps {
 export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.Element {
   useHardwareBack(isOpen, onClose)
   const { fontSize, setFontSize, isPaginated, setIsPaginated } = useSettingsStore()
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+
+  const handleSave = async (): Promise<void> => {
+    setSaveState('saving')
+    try {
+      const settingsData = await loadSettings()
+      settingsData.global = { fontSize, isPaginated }
+      setSaveState((await saveSettings(settingsData)) ? 'saved' : 'error')
+    } catch (error) {
+      console.error('Failed to save settings:', error)
+      setSaveState('error')
+    }
+  }
 
   return (
     <div className="flex h-full flex-col bg-black p-6 text-zinc-200">
@@ -37,7 +51,10 @@ export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.
           </div>
           <div className="flex items-center gap-4">
             <button
-              onClick={() => setFontSize(fontSize - 10)}
+              onClick={() => {
+                setFontSize(fontSize - 10)
+                setSaveState('idle')
+              }}
               type="button"
               aria-label="Decrease font size"
               disabled={fontSize === 0}
@@ -47,7 +64,10 @@ export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.
             </button>
             <span className="min-w-12 text-center text-sm text-zinc-400">{fontSize}%</span>
             <button
-              onClick={() => setFontSize(fontSize + 10)}
+              onClick={() => {
+                setFontSize(fontSize + 10)
+                setSaveState('idle')
+              }}
               type="button"
               aria-label="Increase font size"
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-lg text-zinc-300 transition-colors active:border-red-600/70 active:text-red-400"
@@ -62,7 +82,10 @@ export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.
           <p className="mt-1 text-xs text-zinc-500">Choose how to move through the book</p>
           <div className="mt-3 flex flex-col gap-2">
             <button
-              onClick={() => setIsPaginated(false)}
+              onClick={() => {
+                setIsPaginated(false)
+                setSaveState('idle')
+              }}
               type="button"
               aria-pressed={!isPaginated}
               className={`flex items-center justify-between rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
@@ -80,7 +103,10 @@ export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.
               />
             </button>
             <button
-              onClick={() => setIsPaginated(true)}
+              onClick={() => {
+                setIsPaginated(true)
+                setSaveState('idle')
+              }}
               type="button"
               aria-pressed={isPaginated}
               className={`flex items-center justify-between rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
@@ -100,6 +126,20 @@ export default function Settings({ onClose, isOpen }: SettingsProps): React.JSX.
           </div>
         </section>
       </div>
+      <footer className="border-t border-zinc-800/80 pt-4">
+        <button
+          type="button"
+          onClick={() => void handleSave()}
+          disabled={saveState === 'saving'}
+          className="w-full rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold tracking-widest text-white transition-colors active:bg-red-500 disabled:cursor-wait disabled:opacity-60"
+        >
+          {saveState === 'saving' ? 'SAVING...' : 'SAVE'}
+        </button>
+        <p aria-live="polite" className="mt-2 text-center text-xs text-zinc-500">
+          {saveState === 'saved' && 'Settings saved.'}
+          {saveState === 'error' && 'Could not save settings.'}
+        </p>
+      </footer>
     </div>
   )
 }
