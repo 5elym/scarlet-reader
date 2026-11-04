@@ -93,7 +93,6 @@ export default function EPUBViewer({
     const contents = renditionRef.current.getContents()[0]
     const range = currentSelection ? renditionRef.current.getRange(currentSelection) : null
     const selectedText = editingNote?.term ?? range?.toString().trim().toLowerCase()
-    const savedCurrentLocation = currentLocationRef.current
 
     if (selectedText && dbKeyRef.current) {
       globalNotesRef.current[selectedText] = userNote
@@ -112,12 +111,6 @@ export default function EPUBViewer({
     setEditingNote(null)
     handleCancelSelection()
     applyGlobalNotes(contents.document, globalNotesRef.current)
-
-    requestAnimationFrame(() => {
-      if (savedCurrentLocation) {
-        void renditionRef.current?.display(savedCurrentLocation)
-      }
-    })
   }
 
   const handleDeleteNote = async (note: Record<string, string>): Promise<void> => {
